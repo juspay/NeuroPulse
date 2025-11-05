@@ -6,9 +6,9 @@ NeuroPulse streamlines project management by connecting Jira, AI analysis, and S
 
 ## ✨ Key Features
 
-- 🤖 **AI-Powered Summaries**: GPT-4 analyzes Jira data for intelligent insights
+- 🤖 **AI-Powered Summaries**: Vertex AI analyzes Jira data for intelligent insights
 - 📅 **Automated Scheduling**: Configurable daily summaries (default: 9 AM weekdays)
-- 🔗 **Multi-Platform Integration**: Jira, Slack, OpenAI seamlessly connected
+- 🔗 **Multi-Platform Integration**: Jira, Slack, Vertex AI seamlessly connected
 - 🚀 **Shelly GitHub Integration**: Automated repository setup and deployment
 - 📊 **Smart Analytics**: Blocker detection, priority analysis, trend identification
 - 🎯 **Multi-Project Support**: Handle multiple Jira projects independently
@@ -19,7 +19,7 @@ NeuroPulse streamlines project management by connecting Jira, AI analysis, and S
 - Node.js 18.x LTS or higher
 - Jira account with API access
 - Slack workspace with bot permissions
-- OpenAI account with API key
+- Google Cloud account with Vertex AI access
 - GitHub account (for Shelly integration)
 
 ### Installation
@@ -56,8 +56,10 @@ JIRA_PROJECT_KEY=PROJ
 SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
 SLACK_CHANNEL_ID=C1234567890
 
-# OpenAI Configuration
-OPENAI_API_KEY=sk-your-openai-api-key
+# Vertex AI Configuration
+GOOGLE_CLOUD_PROJECT=your-gcp-project-id
+GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account-key.json
+VERTEX_AI_LOCATION=us-central1
 
 # GitHub Configuration (for Shelly)
 GITHUB_TOKEN=ghp_your-github-token
@@ -83,10 +85,11 @@ npm run test:jira
 # Add bot to target channel
 ```
 
-#### 3. OpenAI Setup
+#### 3. Vertex AI Setup
 ```bash
-# Get API key at: https://platform.openai.com/api-keys
-# Ensure GPT-4 access for optimal results
+# Set up Google Cloud service account at: https://console.cloud.google.com/
+# Enable Vertex AI API and download service account key
+# Set GOOGLE_APPLICATION_CREDENTIALS environment variable
 ```
 
 #### 4. Shelly Integration Setup
@@ -196,7 +199,7 @@ shelly status          # Check configuration status
                               │
                               │
                     ┌─────────▼──────────┐
-                    │    OpenAI GPT-4    │
+                    │   Vertex AI PaLM   │
                     │   AI Processing    │
                     └────────────────────┘
                               │
@@ -210,7 +213,7 @@ shelly status          # Check configuration status
 ### Core Services
 
 - **JiraService**: Fetches issues and project data
-- **AIService**: Processes data with GPT-4 for intelligent summaries
+- **AIService**: Processes data with Vertex AI for intelligent summaries
 - **SlackService**: Posts formatted messages with rich formatting
 - **SchedulerService**: Manages cron-based automation
 - **ShellyIntegration**: Handles GitHub repository automation
@@ -263,7 +266,7 @@ shelly status          # Check configuration status
 
 ### Planned Improvements
 
-- [ ] Advanced AI model selection (GPT-4o, Claude)
+- [ ] Advanced AI model selection (PaLM 2, Gemini Pro)
 - [ ] Custom Slack slash commands
 - [ ] Real-time notifications for critical issues
 - [ ] Integration with additional project management tools
@@ -292,9 +295,12 @@ npm test             # Test complete flow
 
 **AI Generation Errors**
 ```bash
-# Check OpenAI API status
-curl -H "Authorization: Bearer $OPENAI_API_KEY" \
-     https://api.openai.com/v1/models
+# Check Vertex AI access
+gcloud auth list
+gcloud config get-value project
+
+# Test Vertex AI API
+gcloud ai models list --region=$VERTEX_AI_LOCATION
 ```
 
 For detailed troubleshooting, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
