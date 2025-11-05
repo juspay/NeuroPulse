@@ -26,7 +26,7 @@ NeuroPulse streamlines project management by connecting Jira, AI analysis, and S
 
 ```bash
 # Clone repository
-git clone https://github.com/Swetha-160303/NeuroPulse.git
+git clone https://github.com/juspay/NeuroPulse.git
 cd NeuroPulse
 
 # Install dependencies
@@ -244,63 +244,180 @@ shelly status          # Check configuration status
    • 2 new features deployed
 ```
 
-## 🔍 Gap Analysis & Improvements
+## 🔍 Current Status & Improvements
 
-### Current Gaps Identified
+### ✅ Recent Improvements
 
-1. **Limited Error Handling**
-   - Need better retry mechanisms for API failures
-   - Enhanced logging for debugging
+1. **Documentation Enhancement**
+   - ✅ Enhanced README with Shelly integration guide
+   - ✅ Corrected AI service documentation (OpenAI → Vertex AI)
+   - ✅ Added comprehensive troubleshooting guide
+   - ✅ Created professional commit policy for enterprise standards
 
-2. **Basic AI Prompts**
-   - Could benefit from more sophisticated prompt engineering
-   - Team-specific customization needed
+2. **Repository Organization**
+   - ✅ Moved documentation to structured `/docs` directory
+   - ✅ Updated remote repository to Juspay organization
+   - ✅ Established professional git workflow standards
 
-3. **Manual GitHub Setup**
-   - ✅ **SOLVED**: Shelly integration now automates repository setup
-   - ✅ **SOLVED**: Automated CI/CD pipeline configuration
+### 🔧 Active Issues
 
-4. **Documentation Gaps**
-   - ✅ **IMPROVED**: Enhanced README with Shelly documentation
-   - ✅ **IMPROVED**: Clear setup instructions
+1. **GitHub Integration Challenges**
+   - ⚠️ **Classic PAT tokens blocked** by enterprise security policies
+   - ⚠️ **Repository access permissions** need fine-grained tokens
+   - 🔄 **In Progress**: Coordinating with Juspay team for access resolution
 
-### Planned Improvements
+2. **Technical Debt**
+   - 🔄 Limited error handling and retry mechanisms
+   - 🔄 Basic AI prompt engineering needs enhancement
+   - 🔄 Logging and monitoring improvements needed
 
-- [ ] Advanced AI model selection (PaLM 2, Gemini Pro)
-- [ ] Custom Slack slash commands
-- [ ] Real-time notifications for critical issues
-- [ ] Integration with additional project management tools
-- [ ] Advanced analytics dashboard
+### 🎯 Planned Enhancements
+
+- [ ] **Enhanced AI Models**: PaLM 2, Gemini Pro integration
+- [ ] **Advanced Authentication**: Fine-grained GitHub tokens support
+- [ ] **Custom Slack Commands**: Interactive slash commands
+- [ ] **Real-time Monitoring**: Live notification system
+- [ ] **Multi-tool Integration**: Beyond Jira (Linear, Asana, etc.)
+- [ ] **Analytics Dashboard**: Visual project health metrics
 
 ## 🚨 Troubleshooting
 
-### Common Issues
+### Critical Issues & Solutions
 
-**Shelly Setup Fails**
+#### **GitHub Authentication Problems**
+
+**Problem**: `Personal access tokens (classic) are forbidden from accessing this repository`
 ```bash
-# Check GitHub token permissions
-echo $GITHUB_TOKEN
+# Error when pushing to Juspay repository
+git push origin release
+# remote: Personal access tokens (classic) are forbidden from accessing this repository.
+# fatal: unable to access 'https://github.com/juspay/NeuroPulse.git/': The requested URL returned error: 403
+```
 
-# Ensure token has repo, workflow, and admin:repo_hook scopes
-# Re-run setup
+**Solutions**:
+1. **Use Fine-Grained Personal Access Tokens**
+   ```bash
+   # Create fine-grained token at: https://github.com/settings/personal-access-tokens/new
+   # Select specific repository: juspay/NeuroPulse
+   # Grant permissions: Contents (read/write), Metadata (read), Pull requests (write)
+   ```
+
+2. **Request Repository Access**
+   ```bash
+   # Contact Juspay team for collaborator access
+   # Email: opensource@juspay.in
+   # Include: GitHub username and required permissions
+   ```
+
+3. **Alternative: SSH Authentication**
+   ```bash
+   # Generate SSH key
+   ssh-keygen -t ed25519 -C "your-email@company.com"
+   
+   # Add to GitHub account and update remote
+   git remote set-url origin git@github.com:juspay/NeuroPulse.git
+   ```
+
+#### **Shelly Integration Issues**
+
+**Problem**: Shelly setup fails with authentication errors
+```bash
 shelly gh --force
+# ❌ GitHub setup failed: Failed to get repository info
 ```
 
-**Daily Summaries Not Posted**
+**Solutions**:
 ```bash
-# Test individual components
-npm run test:jira    # Test Jira connection
-npm test             # Test complete flow
+# 1. Verify token permissions
+echo $GITHUB_TOKEN  # Should not be empty
+
+# 2. Check token scopes (needs repo, workflow, admin:repo_hook)
+curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user
+
+# 3. Use organization-compatible token
+# Classic tokens may be restricted - use fine-grained tokens
+
+# 4. Re-run with verbose logging
+DEBUG=* shelly gh --force
 ```
 
-**AI Generation Errors**
+#### **Daily Summary Generation Problems**
+
+**Problem**: Summaries not being posted to Slack
 ```bash
-# Check Vertex AI access
+# Test individual components step by step
+npm run test:jira     # Test Jira API connection
+npm test              # Test complete summary generation flow
+```
+
+**Common Causes & Fixes**:
+```bash
+# 1. Jira Authentication Issues
+export JIRA_DOMAIN="company.atlassian.net"  # No https://
+export JIRA_EMAIL="your-email@company.com"
+export JIRA_API_TOKEN="your-api-token"
+
+# 2. Slack Bot Permissions
+# Ensure bot has: chat:write, channels:read, users:read
+# Add bot to target channel manually
+
+# 3. Vertex AI Configuration
+gcloud auth application-default login
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account-key.json"
+export GOOGLE_CLOUD_PROJECT="your-project-id"
+```
+
+#### **Vertex AI Processing Errors**
+
+**Problem**: AI summary generation fails
+```bash
+# Check Google Cloud authentication
 gcloud auth list
 gcloud config get-value project
 
-# Test Vertex AI API
+# Test Vertex AI API access
 gcloud ai models list --region=$VERTEX_AI_LOCATION
+
+# Verify service account permissions
+gcloud projects get-iam-policy $GOOGLE_CLOUD_PROJECT
+```
+
+**Solutions**:
+```bash
+# 1. Enable required APIs
+gcloud services enable aiplatform.googleapis.com
+gcloud services enable compute.googleapis.com
+
+# 2. Set up service account with proper roles
+gcloud iam service-accounts create neuropulse-ai \
+  --description="NeuroPulse AI Service Account" \
+  --display-name="NeuroPulse AI"
+
+gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
+  --member="serviceAccount:neuropulse-ai@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com" \
+  --role="roles/aiplatform.user"
+
+# 3. Download and set credentials
+gcloud iam service-accounts keys create ~/neuropulse-key.json \
+  --iam-account=neuropulse-ai@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
+export GOOGLE_APPLICATION_CREDENTIALS="$HOME/neuropulse-key.json"
+```
+
+### 🆘 Emergency Procedures
+
+**Critical Production Issues**:
+1. **Check system status**: `npm run health-check` (if available)
+2. **Review logs**: `tail -f logs/neuropulse.log`
+3. **Restart services**: `pm2 restart neuropulse` or `npm start`
+4. **Escalate to team**: opensource@juspay.in
+
+**Rollback Procedure**:
+```bash
+# If recent deployment broke functionality
+git log --oneline -10  # Find last working commit
+git checkout <working-commit-hash>
+npm install && npm run build
+pm2 restart neuropulse
 ```
 
 For detailed troubleshooting, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
