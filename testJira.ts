@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-async function testJiraConnection() {
+async function testJiraConnection(): Promise<void> {
   try {
     console.log("🔍 Testing Jira connection...");
     console.log("Base URL:", process.env.JIRA_BASE_URL);
@@ -58,12 +58,12 @@ async function testJiraConnection() {
       
       if (searchData.values && searchData.values.length > 0) {
         console.log("\n📋 Sample issues:");
-        searchData.values.slice(0, 3).forEach(issue => {
+        searchData.values.slice(0, 3).forEach((issue: any) => {
           console.log(`- ${issue.key}: ${issue.fields.summary} [${issue.fields.status.name}]`);
         });
       } else if (searchData.issues && searchData.issues.length > 0) {
         console.log("\n📋 Sample issues:");
-        searchData.issues.slice(0, 3).forEach(issue => {
+        searchData.issues.slice(0, 3).forEach((issue: any) => {
           console.log(`- ${issue.key}: ${issue.fields.summary} [${issue.fields.status.name}]`);
         });
       }
@@ -73,7 +73,8 @@ async function testJiraConnection() {
     }
 
   } catch (error) {
-    console.error("💥 Error testing Jira:", error.message);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("💥 Error testing Jira:", errorMessage);
   }
 }
 
