@@ -1,0 +1,207 @@
+site_name: NeuroPulse
+site_description: AI-Powered Jira Integration and Daily Summary System
+site_author: Juspay Engineering Team
+site_url: https://neuropulse.juspay.in/
+
+# Repository
+repo_name: NeuroPulse
+repo_url: https://github.com/juspay/NeuroPulse
+edit_uri: edit/main/docs/
+
+# Copyright
+copyright: Copyright &copy; 2024 - 2025 Juspay Technologies
+
+# Configuration
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+    - content.action.edit
+    - content.action.view
+  language: en
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+
+# Plugins
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - minify:
+      minify_html: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+
+# Customization
+extra:
+  version:
+    provider: mike
+    default: stable
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/juspay/NeuroPulse
+    - icon: fontawesome/brands/slack
+      link: https://juspay.slack.com
+    - icon: fontawesome/solid/envelope
+      link: mailto:opensource@juspay.in
+  analytics:
+    provider: google
+    property: G-NEUROPULSE-ANALYTICS
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:materialx.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: juspay
+      repo: NeuroPulse
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Page tree
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: GETTING_STARTED.md
+    - Installation: getting-started/installation.md
+    - Environment Setup: getting-started/environment-setup.md
+    - Configuration: getting-started/configuration.md
+    - First Daily Summary: getting-started/first-summary.md
+  - User Guide:
+    - Overview: user-guide/overview.md
+    - Daily Summaries: user-guide/daily-summaries.md
+    - Jira Integration: user-guide/jira-integration.md
+    - Slack Integration: user-guide/slack-integration.md
+    - AI Features: user-guide/ai-features.md
+    - Scheduling: user-guide/scheduling.md
+    - Multi-Project Setup: user-guide/multi-project.md
+  - API Reference:
+    - API Overview: API.md
+    - Core Services: api/services.md
+    - Jira Service: api/jira-service.md
+    - AI Service: api/ai-service.md
+    - Slack Service: api/slack-service.md
+    - Scheduler Service: api/scheduler-service.md
+    - Configuration: api/configuration.md
+    - Types & Interfaces: api/types.md
+  - Services Documentation:
+    - Service Architecture: services/architecture.md
+    - Jira Integration: services/jira.md
+    - OpenAI Integration: services/openai.md
+    - Slack Integration: services/slack.md
+    - Scheduler Service: services/scheduler.md
+    - Error Handling: services/error-handling.md
+    - Performance: services/performance.md
+  - Examples & Tutorials:
+    - Basic Usage: examples/basic-usage.md
+    - Custom Templates: examples/custom-templates.md
+    - Advanced Scheduling: examples/advanced-scheduling.md
+    - Multi-Project Configuration: examples/multi-project.md
+    - Integration Examples: examples/integrations.md
+    - Demo Projects: neurolink-demo/README.md
+  - Development:
+    - Contributing: CONTRIBUTING.md
+    - Architecture: development/architecture.md
+    - Service Patterns: development/service-patterns.md
+    - Testing: development/testing.md
+    - Deployment: development/deployment.md
+    - Performance Tuning: development/performance.md
+  - Memory Bank:
+    - Project Context: memory-bank/README.md
+    - Project Brief: memory-bank/project/projectbrief.md
+    - Product Context: memory-bank/project/productContext.md
+    - Technical Context: memory-bank/technical/techContext.md
+    - System Patterns: memory-bank/technical/systemPatterns.md
+    - Active Context: memory-bank/current/activeContext.md
+    - Progress Tracking: memory-bank/current/progress.md
+  - Operations:
+    - Deployment Guide: operations/deployment.md
+    - Monitoring: operations/monitoring.md
+    - Health Checks: operations/health-checks.md
+    - Troubleshooting: TROUBLESHOOTING.md
+    - Security: operations/security.md
+    - Backup & Recovery: operations/backup.md
+  - About:
+    - License: LICENSE.md
+    - Changelog: CHANGELOG.md
+    - Code of Conduct: CODE_OF_CONDUCT.md
+    - Support: about/support.md
+    - Team: about/team.md
+
+# Extra CSS
+extra_css:
+  - stylesheets/extra.css
+  - stylesheets/neuropulse.css
+
+# Extra JavaScript
+extra_javascript:
+  - javascripts/config.js
+  - javascripts/neuropulse.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+# Watch for changes
+watch:
+  - src/
+  - docs/
+  - memory-bank/
+  - neurolink-demo/

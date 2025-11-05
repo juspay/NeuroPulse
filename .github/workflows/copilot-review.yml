@@ -1,0 +1,196 @@
+name: Copilot Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/**/*.ts'
+      - 'src/**/*.js'
+      - '*.ts'
+      - '*.js'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  copilot-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: NeuroPulse Code Analysis
+        run: |
+          echo "🤖 Analyzing NeuroPulse codebase..."
+          echo "📊 Code statistics:"
+          find src -name "*.ts" | wc -l | xargs echo "TypeScript files:"
+          find src -name "*.js" | wc -l | xargs echo "JavaScript files:"
+          
+          echo "🔍 Key components analysis:"
+          echo "Services:" && ls -la src/services/ || echo "No services directory"
+          echo "Utils:" && ls -la src/utils/ || echo "No utils directory"
+          echo "Types:" && ls -la src/types/ || echo "No types directory"
+
+      - name: TypeScript Quality Check
+        run: |
+          echo "🔍 TypeScript code quality analysis..."
+          npm run type-check
+          
+          echo "📝 Checking for common AI agent patterns..."
+          # Check for proper error handling in AI services
+          grep -r "try.*catch" src/ || echo "⚠️  Consider adding more error handling"
+          
+          # Check for async/await patterns
+          grep -r "async.*await" src/ || echo "ℹ️  No async patterns found"
+          
+          # Check for environment variable usage
+          grep -r "process\.env" src/ || echo "ℹ️  No environment variables used"
+
+      - name: NeuroPulse AI Service Specific Review
+        run: |
+          echo "🧠 NeuroPulse AI Service specific checks..."
+          
+          # Check for AI service patterns
+          if [ -f "src/services/aiService.ts" ]; then
+            echo "✅ AI Service found"
+            grep -n "VertexAI\|OpenAI\|anthropic" src/services/aiService.ts || echo "ℹ️  AI provider not clearly identified"
+          fi
+          
+          # Check for Slack integration
+          if [ -f "src/services/slackService.ts" ]; then
+            echo "✅ Slack Service found"
+            grep -n "socket.*mode\|slack.*api" src/services/slackService.ts || echo "ℹ️  Slack integration pattern unclear"
+          fi
+          
+          # Check for Jira integration
+          if [ -f "src/services/jiraService.ts" ]; then
+            echo "✅ Jira Service found"
+            grep -n "jira.*api\|atlassian" src/services/jiraService.ts || echo "ℹ️  Jira integration pattern unclear"
+          fi
+
+      - name: Security Review
+        run: |
+          echo "🔒 Security review for NeuroPulse..."
+          
+          # Check for hardcoded secrets
+          echo "Checking for potential hardcoded secrets..."
+          grep -r -i "password\|secret\|key\|token" src/ --include="*.ts" --include="*.js" | grep -v "process.env" || echo "✅ No hardcoded secrets found"
+          
+          # Check for proper input validation
+          echo "Checking for input validation..."
+          grep -r "validation\|sanitize\|escape" src/ || echo "⚠️  Consider adding input validation"
+
+      - name: Performance Review
+        run: |
+          echo "⚡ Performance considerations..."
+          
+          # Check for memory-intensive operations
+          grep -r "map\|filter\|reduce" src/ && echo "ℹ️  Found array operations - consider performance impact" || echo "✅ No obvious array operations"
+          
+          # Check for caching patterns
+          grep -r "cache\|memoize" src/ && echo "✅ Caching patterns found" || echo "ℹ️  Consider adding caching for AI responses"
+
+      - name: Copilot Code Review
+        uses: github/copilot-review-action@v1
+        continue-on-error: true
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          review-comment-lgtm: false
+          path-filters: |
+            **/*.ts
+            **/*.js
+            **/package.json
+            **/tsconfig.json
+          exclude-paths: |
+            node_modules/**
+            dist/**
+            build/**
+            .next/**
+            coverage/**
+
+      - name: AI Agent Specific Feedback
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Analyze the changes for AI agent specific patterns
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            let feedback = ['🤖 **NeuroPulse Code Review Feedback**\n'];
+            
+            for (const file of files) {
+              if (file.filename.includes('aiService')) {
+                feedback.push('🧠 **AI Service Changes Detected**');
+                feedback.push('- Ensure proper error handling for AI API failures');
+                feedback.push('- Verify rate limiting and quota management');
+                feedback.push('- Check for proper context window management\n');
+              }
+              
+              if (file.filename.includes('slackService')) {
+                feedback.push('💬 **Slack Service Changes Detected**');
+                feedback.push('- Verify Socket Mode connection handling');
+                feedback.push('- Check message parsing and thread handling');
+                feedback.push('- Ensure proper user authentication\n');
+              }
+              
+              if (file.filename.includes('jiraService')) {
+                feedback.push('📋 **Jira Service Changes Detected**');
+                feedback.push('- Verify API authentication and permissions');
+                feedback.push('- Check project and issue filtering logic');
+                feedback.push('- Ensure proper error handling for API failures\n');
+              }
+              
+              if (file.filename.includes('scheduler')) {
+                feedback.push('⏰ **Scheduler Changes Detected**');
+                feedback.push('- Verify cron job timing and timezone handling');
+                feedback.push('- Check for proper cleanup and resource management');
+                feedback.push('- Ensure graceful shutdown handling\n');
+              }
+            }
+            
+            if (feedback.length > 1) {
+              feedback.push('\n---');
+              feedback.push('💡 **General Recommendations**');
+              feedback.push('- Add comprehensive logging for debugging');
+              feedback.push('- Include proper TypeScript types for all interfaces');
+              feedback.push('- Consider adding unit tests for critical functions');
+              feedback.push('- Ensure environment variables are documented');
+              
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: feedback.join('\n')
+              });
+            }
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🤖 NeuroPulse code review completed! Check the Files Changed tab for detailed feedback and the Actions tab for the full analysis report.'
+            })

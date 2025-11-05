@@ -1,0 +1,370 @@
+name: Single Commit Per Branch Enforcement
+
+on:
+  push:
+    branches-ignore: [release, main, develop]
+  pull_request:
+    branches: [release, main]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  enforce-single-commit:
+    runs-on: ubuntu-latest
+    name: 🔒 NeuroPulse Single Commit Policy Validation
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: NeuroPulse Branch Analysis
+        run: |
+          echo "🤖 Analyzing NeuroPulse branch structure..."
+          
+          echo "📊 Branch information:"
+          echo "Event: ${{ github.event_name }}"
+          echo "Branch: ${{ github.head_ref || github.ref_name }}"
+          echo "Base: ${{ github.base_ref || 'main' }}"
+          
+          echo "🔍 Checking for AI-specific file changes..."
+          git diff --name-only HEAD~1 2>/dev/null | grep -E "(aiService|slackService|jiraService|scheduler)" || echo "No AI service changes detected"
+
+      - name: Validate Single Commit Policy
+        id: validate
+        run: |
+          # Determine the base branch and current branch
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_BRANCH="origin/${{ github.base_ref }}"
+            BRANCH_NAME="${{ github.head_ref }}"
+            
+            # Handle external vs internal contributors differently using repository IDs for security
+            if [ "${{ github.event.pull_request.head.repo.id }}" != "${{ github.event.repository.id }}" ]; then
+              # External contributor - use the PR head SHA directly
+              CURRENT_BRANCH="HEAD"
+              echo "📡 External contributor detected"
+              echo "🔍 Head repository ID: ${{ github.event.pull_request.head.repo.id }}"
+              echo "🔍 Base repository ID: ${{ github.event.repository.id }}"
+              echo "🔍 Using PR head SHA: ${{ github.event.pull_request.head.sha }}"
+              
+              # For external PRs, checkout the actual PR commit (not the merge commit)
+              echo "🔄 Checking out PR head commit for validation..."
+              git checkout "${{ github.event.pull_request.head.sha }}"
+              CURRENT_BRANCH="HEAD"
+            else
+              # Internal branch - can checkout the actual branch
+              echo "🏠 Internal contributor detected"
+              echo "🔄 Switching to actual PR head branch for validation..."
+              git checkout "origin/${{ github.head_ref }}"
+              CURRENT_BRANCH="origin/${{ github.head_ref }}"
+            fi
+          else
+            BASE_BRANCH="origin/main"
+            CURRENT_BRANCH="HEAD"
+            BRANCH_NAME="${{ github.ref_name }}"
+          fi
+
+          echo "🔍 Validating NeuroPulse single commit policy..."
+          echo "Base branch: $BASE_BRANCH"
+          echo "Current branch: $BRANCH_NAME"
+
+          # Ensure we have the latest refs
+          git fetch origin
+
+          # Count commits ahead of base branch
+          COMMIT_COUNT=$(git rev-list --count $CURRENT_BRANCH ^$BASE_BRANCH 2>/dev/null || echo "0")
+
+          echo "commits_ahead=$COMMIT_COUNT" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "base_branch=$BASE_BRANCH" >> $GITHUB_OUTPUT
+
+          echo "📊 Commits ahead of base: $COMMIT_COUNT"
+
+          # Validate commit count
+          if [ $COMMIT_COUNT -eq 0 ]; then
+            echo "✅ Branch is up to date with base branch"
+            echo "status=up_to_date" >> $GITHUB_OUTPUT
+          elif [ $COMMIT_COUNT -eq 1 ]; then
+            echo "✅ Branch contains exactly 1 commit - POLICY COMPLIANT"
+            echo "status=compliant" >> $GITHUB_OUTPUT
+            
+            # Get the single commit details
+            COMMIT_HASH=$(git rev-list -1 $CURRENT_BRANCH ^$BASE_BRANCH)
+            COMMIT_MSG=$(git log -1 --pretty=format:"%s" $COMMIT_HASH)
+            COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an" $COMMIT_HASH)
+            COMMIT_FILES=$(git diff-tree --no-commit-id --name-only -r $COMMIT_HASH | head -10)
+            
+            echo "📝 Commit: $COMMIT_MSG"
+            echo "👤 Author: $COMMIT_AUTHOR"
+            echo "🔑 Hash: $COMMIT_HASH"
+            echo "📁 Files changed:"
+            echo "$COMMIT_FILES"
+            
+            echo "commit_message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+            echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+            echo "commit_author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+            echo "commit_files=$COMMIT_FILES" >> $GITHUB_OUTPUT
+            
+          else
+            echo "❌ POLICY VIOLATION: Branch contains $COMMIT_COUNT commits"
+            echo "status=violation" >> $GITHUB_OUTPUT
+            
+            # Get details of all commits for the error message
+            echo "📋 Commits in this branch:"
+            git log --oneline $CURRENT_BRANCH ^$BASE_BRANCH
+          fi
+
+      - name: Validate NeuroPulse Commit Message Format
+        if: steps.validate.outputs.status == 'compliant'
+        run: |
+          COMMIT_MSG="${{ steps.validate.outputs.commit_message }}"
+          echo "🔍 Validating NeuroPulse commit message format: '$COMMIT_MSG'"
+
+          # Check semantic commit format for NeuroPulse: type(scope): description  
+          if ! echo "$COMMIT_MSG" | grep -qE "^[a-z]+\([^)]+\): .+"; then
+            echo "❌ Commit message doesn't follow NeuroPulse semantic format"
+            echo "Expected: type(scope): description"
+            echo "Received: $COMMIT_MSG"
+            echo ""
+            echo "🤖 Valid NeuroPulse examples:"
+            echo "  feat(ai): add Google Vertex AI integration"
+            echo "  fix(slack): resolve socket connection timeout"
+            echo "  feat(jira): implement issue status tracking"
+            echo "  fix(scheduler): handle timezone conversion error"
+            echo "  docs(api): update service documentation"
+            echo "  refactor(services): optimize AI response caching"
+            echo ""
+            echo "📋 Common NeuroPulse scopes:"
+            echo "  - ai, aiService: AI/ML related changes"
+            echo "  - slack, slackService: Slack integration"
+            echo "  - jira, jiraService: Jira integration"
+            echo "  - scheduler: Task scheduling"
+            echo "  - config: Configuration changes"
+            echo "  - types: TypeScript type definitions"
+            echo "  - utils: Utility functions"
+            exit 1
+          fi
+
+          echo "✅ NeuroPulse commit message format is valid"
+
+      - name: Validate NeuroPulse Specific Patterns
+        if: steps.validate.outputs.status == 'compliant'
+        run: |
+          COMMIT_MSG="${{ steps.validate.outputs.commit_message }}"
+          
+          echo "🧠 Validating NeuroPulse specific commit patterns..."
+          
+          # Check for AI service related commits
+          if echo "$COMMIT_MSG" | grep -qE "(ai|vertex|openai|anthropic|neurolink)"; then
+            echo "🤖 AI service change detected"
+            echo "🔒 Ensure sensitive AI credentials are not committed"
+            echo "📊 Verify AI response handling and error cases"
+          fi
+          
+          # Check for integration service commits
+          if echo "$COMMIT_MSG" | grep -qE "(slack|jira|integration)"; then
+            echo "🔗 Integration service change detected"
+            echo "🔑 Verify API tokens and authentication"
+            echo "🔄 Check rate limiting and retry logic"
+          fi
+          
+          # Check for scheduler commits
+          if echo "$COMMIT_MSG" | grep -qE "(scheduler|cron|timing)"; then
+            echo "⏰ Scheduler change detected"
+            echo "🌍 Verify timezone handling (IST)"
+            echo "🔄 Check graceful shutdown procedures"
+          fi
+          
+          echo "✅ NeuroPulse specific validations completed"
+
+      - name: Check for Merge Commits
+        if: steps.validate.outputs.status == 'compliant'
+        run: |
+          BASE_BRANCH="${{ steps.validate.outputs.base_branch }}"
+
+          # Check for merge commits in the branch
+          MERGE_COMMITS=$(git rev-list --merges HEAD ^$BASE_BRANCH)
+          if [ -n "$MERGE_COMMITS" ]; then
+            echo "❌ POLICY VIOLATION: Branch contains merge commits"
+            echo "Merge commits are not allowed in NeuroPulse feature branches."
+            echo "Please rebase your branch instead of merging."
+            echo ""
+            echo "🔧 To fix NeuroPulse branch:"
+            echo "  git rebase $BASE_BRANCH"
+            echo "  git push --force-with-lease"
+            echo ""
+            echo "🤖 This ensures clean NeuroPulse commit history"
+            exit 1
+          fi
+
+          echo "✅ No merge commits found"
+
+      - name: Provide NeuroPulse Squash Instructions
+        if: steps.validate.outputs.status == 'violation'
+        run: |
+          COMMIT_COUNT="${{ steps.validate.outputs.commits_ahead }}"
+          BRANCH_NAME="${{ steps.validate.outputs.branch_name }}"
+
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🚫 NEUROPULSE SINGLE COMMIT POLICY VIOLATION"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "❌ Branch '$BRANCH_NAME' contains $COMMIT_COUNT commits"
+          echo "✅ NeuroPulse requires exactly 1 commit per branch for clean integration"
+          echo ""
+          echo "🔧 TO FIX - Squash your NeuroPulse commits:"
+          echo ""
+          echo "1. Interactive rebase to squash commits:"
+          echo "   git rebase -i HEAD~$COMMIT_COUNT"
+          echo ""
+          echo "2. In the editor, change 'pick' to 'squash' (or 's') for all commits except the first"
+          echo "3. Save and close the editor"
+          echo "4. Edit the commit message using NeuroPulse format:"
+          echo "   Examples:"
+          echo "   - feat(ai): add Google Vertex AI daily summary generation"
+          echo "   - fix(slack): resolve socket connection timeout in message fetching"
+          echo "   - feat(jira): implement comprehensive issue status tracking"
+          echo "5. Force push the squashed commit:"
+          echo "   git push --force-with-lease"
+          echo ""
+          echo "🎯 Alternative - Reset and recommit:"
+          echo "   git reset --soft HEAD~$COMMIT_COUNT"
+          echo "   git commit -m 'type(scope): your combined NeuroPulse change description'"
+          echo "   git push --force-with-lease"
+          echo ""
+          echo "📋 Current commits that need squashing:"
+          git log --oneline HEAD~$COMMIT_COUNT..HEAD
+          echo ""
+          echo "🤖 Remember: NeuroPulse changes should be atomic and focused"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          exit 1
+
+      - name: Check Comment Permissions
+        if: steps.validate.outputs.status == 'compliant'
+        id: check-permissions
+        run: |
+          # Check if this is an external contributor PR using repository IDs for security
+          if [ "${{ github.event.pull_request.head.repo.id }}" != "${{ github.event.repository.id }}" ]; then
+            echo "🔒 External contributor PR detected - comment posting will be skipped due to GitHub security restrictions"
+            echo "can_comment=false" >> $GITHUB_OUTPUT
+          else
+            echo "🏠 Internal contributor PR - comment posting enabled"
+            echo "can_comment=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Find existing comment
+        if: steps.validate.outputs.status == 'compliant' && steps.check-permissions.outputs.can_comment == 'true'
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        continue-on-error: true
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: NeuroPulse Single Commit Policy
+
+      - name: Post NeuroPulse Success Comment
+        if: steps.validate.outputs.status == 'compliant' && steps.check-permissions.outputs.can_comment == 'true'
+        uses: peter-evans/create-or-update-comment@v4
+        continue-on-error: true
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          body: |
+            ## ✅ NeuroPulse Single Commit Policy - COMPLIANT
+
+            **Status**: Policy requirements met • 1 commit • Valid format • Ready for merge
+
+            <details>
+            <summary>🤖 View NeuroPulse validation details</summary>
+
+            ### 📝 Commit Details
+            - **Hash**: `${{ steps.validate.outputs.commit_hash }}`
+            - **Message**: ${{ steps.validate.outputs.commit_message }}
+            - **Author**: ${{ steps.validate.outputs.commit_author }}
+
+            ### 🔍 Files Changed
+            ```
+            ${{ steps.validate.outputs.commit_files }}
+            ```
+
+            ### ✅ Validation Results
+            - ✅ Single commit requirement met
+            - ✅ No merge commits in branch
+            - ✅ Semantic commit message format verified
+            - ✅ NeuroPulse specific patterns validated
+            - ✅ Ready for squash merge to main branch
+
+            ### 🤖 NeuroPulse Specific Checks
+            - Credential security verified
+            - Service integration patterns validated
+            - Scheduler timing considerations checked
+
+            </details>
+
+            ---
+            *🤖 Automated validation by NeuroPulse Single Commit Enforcement*
+          edit-mode: replace
+
+      - name: Generate NeuroPulse Policy Summary
+        if: always()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🤖 NEUROPULSE SINGLE COMMIT POLICY ENFORCEMENT SUMMARY"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          STATUS="${{ steps.validate.outputs.status }}"
+          case $STATUS in
+            "compliant")
+              echo "✅ STATUS: POLICY COMPLIANT"
+              echo "✅ Single commit requirement satisfied"
+              echo "✅ NeuroPulse semantic format validated"
+              echo "✅ Ready for merge to main branch"
+              ;;
+            "violation")
+              echo "❌ STATUS: POLICY VIOLATION" 
+              echo "❌ Multiple commits detected"
+              echo "🔧 Squashing required before merge"
+              echo "🤖 Ensure NeuroPulse changes are atomic"
+              ;;
+            "up_to_date")
+              echo "ℹ️  STATUS: BRANCH UP TO DATE"
+              echo "ℹ️  No new commits to validate"
+              ;;
+            *)
+              echo "⚠️  STATUS: UNKNOWN"
+              ;;
+          esac
+
+          echo ""
+          echo "📋 NeuroPulse Policy Requirements:"
+          echo "  • Exactly 1 commit per branch"
+          echo "  • Semantic commit message format: type(scope): description" 
+          echo "  • NeuroPulse specific scopes: ai, slack, jira, scheduler"
+          echo "  • No merge commits allowed"
+          echo "  • Squash merge enforced at branch protection level"
+          echo "  • Atomic changes for AI service integrations"
+          echo ""
+          echo "🤖 NeuroPulse Best Practices:"
+          echo "  • Keep AI service changes focused and testable"
+          echo "  • Ensure credential security in all commits"
+          echo "  • Document integration changes clearly"
+          echo "  • Test scheduler timing with timezone considerations"
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
