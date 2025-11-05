@@ -1,0 +1,8 @@
+# Global owners
+* @juspay/ai-agent-maintainers
+
+# Documentation
+*.md @juspay/docs-team
+
+# GitHub workflows
+/.github/ @juspay/devops-team

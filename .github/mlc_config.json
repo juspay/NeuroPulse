@@ -1,0 +1,49 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://localhost"
+    },
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^file://"
+    },
+    {
+      "pattern": "^mailto:"
+    }
+  ],
+  "replacementPatterns": [
+    {
+      "pattern": "^/",
+      "replacement": "https://github.com/Swetha-160303/NeuroPulse/blob/main/"
+    }
+  ],
+  "httpHeaders": [
+    {
+      "urls": ["https://github.com", "https://api.github.com"],
+      "headers": {
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "NeuroPulse-Link-Checker"
+      }
+    }
+  ],
+  "timeout": "20s",
+  "retryOn429": true,
+  "retryCount": 3,
+  "fallbackRetryDelay": "30s",
+  "aliveStatusCodes": [200, 206, 999],
+  "ignoreStatusCodes": [
+    {
+      "urls": ["https://juspay.io", "https://juspay.in"],
+      "statusCodes": [403, 503]
+    }
+  ],
+  "excludeLinks": [
+    "https://example.com",
+    "https://your-domain.com",
+    "http://your-api-endpoint",
+    "https://your-slack-workspace.slack.com",
+    "https://your-jira-instance.atlassian.net"
+  ]
+}

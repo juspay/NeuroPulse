@@ -1,0 +1,62 @@
+# NeuroPulse Dependency Review Configuration
+
+# Security vulnerability settings
+vulnerability-check: true
+fail-on-severity: moderate
+fail-on-scopes:
+  - runtime
+  - development
+
+# License compliance settings
+license-check: true
+allow-licenses:
+  - MIT
+  - Apache-2.0
+  - ISC
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - CC0-1.0
+  - Unlicense
+
+deny-licenses:
+  - GPL-2.0
+  - GPL-3.0
+  - AGPL-1.0
+  - AGPL-3.0
+  - LGPL-2.1
+  - LGPL-3.0
+
+# NeuroPulse specific package rules
+deny-packages:
+  # Known malicious packages
+  - name: "event-stream"
+    reason: "Known malicious package with backdoor"
+  - name: "eslint-scope"
+    version: "3.7.2"
+    reason: "Contains malicious code"
+
+# Allow trusted AI/ML packages
+allow-dependencies-licenses:
+  - package-name: "@google-cloud/vertexai"
+    license: "Apache-2.0"
+  - package-name: "@juspay/neurolink"
+    license: "MIT"
+  - package-name: "@slack/socket-mode"
+    license: "MIT"
+
+# Security advisory configuration
+comment-summary-in-pr: true
+retry-on-snapshot-warnings: true
+warn-only: false
+
+# Performance and size considerations
+size-check: true
+size-threshold: 100MB
+
+# NeuroPulse specific exclusions
+exclude-scopes:
+  - development
+  - devDependencies
+
+# Package source validation
+allow-ghsas: []
