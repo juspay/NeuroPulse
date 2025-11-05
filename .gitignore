@@ -48,6 +48,9 @@ out/
 .env.*
 !.env.example
 
+# GitHub workflows (requires workflow scope in PAT)
+.github/workflows/
+
 # Configs
 .vscode/
 .eslintcache
