@@ -2,6 +2,8 @@ import { NeuroLink } from "@juspay/neurolink";
 import { config } from '../config/config.js';
 
 export class AIService {
+  private neurolink: NeuroLink;
+
   constructor() {
     this.neurolink = new NeuroLink({
       conversationMemory: {
@@ -9,10 +11,10 @@ export class AIService {
       },
       provider: config.ai.neurolinkProvider,
       model: config.ai.neurolinkModel,
-    });
+    } as any);
   }
 
-  async generateDailySummary(userContext, jiraContext, currentDate) {
+  async generateDailySummary(userContext: string, jiraContext: string, currentDate: string): Promise<string> {
     const summaryPrompt = `
 You are a daily standup assistant. Analyze the provided Slack messages and Jira tickets to create comprehensive user-wise daily summary reports.
 
@@ -76,7 +78,8 @@ Analyze each user's messages carefully, paying special attention to the chronolo
 
       return result.content;
     } catch (error) {
-      console.error("❌ Error generating summary:", error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("❌ Error generating summary:", errorMessage);
       throw error;
     }
   }

@@ -1,13 +1,25 @@
 import { config } from '../config/config.js';
+import { SlackMessage, SlackUser } from '../types/index.js';
+
+interface SlackAPIResponse {
+  ok: boolean;
+  error?: string;
+  messages?: SlackMessage[];
+  user?: SlackUser;
+}
 
 export class SlackService {
+  public botToken: string | undefined;
+  public teamChannelId: string | undefined;
+  public summaryChannelId: string | undefined;
+
   constructor() {
     this.botToken = config.slack.botToken;
     this.teamChannelId = config.slack.teamChannelId;
     this.summaryChannelId = config.slack.summaryChannelId;
   }
 
-  async fetchMessages(channelId = this.teamChannelId) {
+  async fetchMessages(channelId: string = this.teamChannelId!): Promise<SlackMessage[]> {
     const url = `https://slack.com/api/conversations.history`;
     
     // Get messages from today
@@ -28,7 +40,7 @@ export class SlackService {
       })
     });
 
-    const data = await response.json();
+    const data: SlackAPIResponse = await response.json();
     if (!data.ok) {
       throw new Error(`Slack API error: ${data.error}`);
     }
@@ -36,22 +48,23 @@ export class SlackService {
     const messages = data.messages || [];
     
     // Fetch thread replies for messages that have them
-    const allMessages = [];
+    const allMessages: SlackMessage[] = [];
     let totalThreadReplies = 0;
     
     for (const message of messages) {
       allMessages.push(message);
       
       // Check if message has thread replies
-      if (message.reply_count && message.reply_count > 0) {
+      if ((message as any).reply_count && (message as any).reply_count > 0) {
         try {
-          console.log(`🧵 Found message with ${message.reply_count} thread replies, fetching...`);
+          console.log(`🧵 Found message with ${(message as any).reply_count} thread replies, fetching...`);
           const threadReplies = await this.fetchThreadReplies(channelId, message.ts);
           allMessages.push(...threadReplies);
           totalThreadReplies += threadReplies.length;
           console.log(`✅ Fetched ${threadReplies.length} thread replies`);
         } catch (error) {
-          console.log(`⚠️ Failed to fetch thread replies for message ${message.ts}:`, error.message);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.log(`⚠️ Failed to fetch thread replies for message ${message.ts}:`, errorMessage);
         }
       }
     }
@@ -65,7 +78,7 @@ export class SlackService {
     return allMessages;
   }
 
-  async fetchThreadReplies(channelId, threadTs) {
+  async fetchThreadReplies(channelId: string, threadTs: string): Promise<SlackMessage[]> {
     const url = `https://slack.com/api/conversations.replies?channel=${channelId}&ts=${threadTs}&limit=50`;
     
     const response = await fetch(url, {
@@ -76,7 +89,7 @@ export class SlackService {
       }
     });
 
-    const data = await response.json();
+    const data: SlackAPIResponse = await response.json();
     if (!data.ok) {
       throw new Error(`Slack thread API error: ${data.error}`);
     }
@@ -89,10 +102,10 @@ export class SlackService {
       ...reply,
       thread_ts: threadTs,
       is_thread_reply: true
-    }));
+    } as SlackMessage));
   }
 
-  async fetchUserInfo(userId) {
+  async fetchUserInfo(userId: string): Promise<{ real_name: string; display_name: string }> {
     const url = `https://slack.com/api/users.info?user=${userId}`;
     
     const response = await fetch(url, {
@@ -103,19 +116,19 @@ export class SlackService {
       },
     });
 
-    const data = await response.json();
+    const data: SlackAPIResponse = await response.json();
     if (!data.ok) {
       console.log(`⚠️ Failed to fetch user info for ${userId}:`, data.error);
       return { real_name: userId, display_name: userId };
     }
 
     return {
-      real_name: data.user.real_name || data.user.profile?.real_name || userId,
-      display_name: data.user.profile?.display_name || data.user.name || userId
+      real_name: data.user?.real_name || data.user?.profile?.real_name || userId,
+      display_name: data.user?.profile?.display_name || data.user?.name || userId
     };
   }
 
-  async postMessage(text, channelId = this.summaryChannelId) {
+  async postMessage(text: string, channelId: string = this.summaryChannelId!): Promise<any> {
     const url = `https://slack.com/api/chat.postMessage`;
     
     const response = await fetch(url, {

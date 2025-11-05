@@ -1,10 +1,15 @@
 import { SchedulerService } from './src/services/schedulerService.js';
 
-async function main() {
+interface SchedulerStatus {
+  isRunning: boolean;
+  nextRun: string;
+}
+
+async function main(): Promise<void> {
   const scheduler = new SchedulerService();
   
   // Check command line arguments
-  const args = process.argv.slice(2);
+  const args: string[] = process.argv.slice(2);
   
   if (args.includes('--now') || args.includes('-n')) {
     // Run summary immediately for testing
@@ -46,25 +51,26 @@ Press Ctrl+C to stop the scheduler.
     
     // Keep alive
     setInterval(() => {
-      const status = scheduler.getStatus();
+      const status: SchedulerStatus = scheduler.getStatus();
       if (status.isRunning) {
         console.log(`💓 Scheduler running - Next summary: ${status.nextRun}`);
       }
     }, 60 * 60 * 1000); // Log status every hour
     
   } catch (error) {
-    console.error('❌ Scheduler failed to start:', error.message);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Scheduler failed to start:', errorMessage);
     process.exit(1);
   }
 }
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', (error: Error) => {
   console.error('❌ Uncaught Exception:', error);
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });

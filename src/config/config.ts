@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
+import { Config } from "../types/index.js";
 
 dotenv.config();
 
-export const config = {
+export const config: Config = {
   slack: {
     botToken: process.env.SLACK_BOT_TOKEN,
     appToken: process.env.SLACK_APP_TOKEN,

@@ -53,6 +53,120 @@ An intelligent Slack bot that automatically generates comprehensive daily summar
    npm start
    ```
 
+## 🧪 Testing & Quick Start
+
+### Quick CLI Commands
+
+**For immediate testing after setup:**
+```bash
+# Install dependencies
+npm install
+
+# Test Jira connection (optional but recommended)
+npm run test:jira
+
+# Run daily summary immediately (main test)
+npm test
+# OR use the direct command
+node dist/index.js --now
+
+# Start the scheduler for production
+npm start
+```
+
+**Available Commands:**
+```bash
+npm start             # Build and start the scheduler (compiled JS)
+npm test              # Build and generate summary immediately
+npm run test:jira     # Test Jira API connection (TypeScript)
+npm run help          # Show detailed help and usage
+npm run dev           # Quick development test (TypeScript)
+npm run build         # Compile TypeScript to JavaScript
+npm run type-check    # Check TypeScript types without compiling
+```
+
+### 🔷 TypeScript Support
+
+NeuroPulse is now built with **TypeScript** for enhanced type safety and development experience:
+
+**TypeScript Development:**
+```bash
+npm run dev           # Quick test with TypeScript (no compilation)
+npm run help          # Direct TypeScript execution
+npm run test:jira     # TypeScript Jira testing
+```
+
+**Production (Compiled JavaScript):**
+```bash
+npm run build         # Compile TypeScript to dist/
+npm start             # Run compiled JavaScript
+npm test              # Run compiled test
+```
+
+**Type Checking:**
+```bash
+npm run type-check    # Verify TypeScript types
+```
+
+### Step-by-Step Testing Process
+
+1. **Environment Setup Test**
+   ```bash
+   # Copy and configure environment
+   cp .env.example .env
+   # Edit .env with your API keys (see Configuration section below)
+   ```
+
+2. **Dependencies Installation**
+   ```bash
+   npm install
+   ```
+
+3. **Jira Connection Test**
+   ```bash
+   npm run test:jira
+   ```
+   Expected output: ✅ Authentication successful, search results
+
+4. **Full Application Test**
+   ```bash
+   npm test
+   ```
+   Expected output: Daily summary generated and posted to Slack
+
+5. **Production Start**
+   ```bash
+   npm start
+   ```
+   The bot will now run continuously and post summaries at 11:00 PM IST daily.
+
+### Direct CLI Commands (Alternative)
+
+If you prefer using node directly:
+```bash
+node index.js --now      # Immediate summary
+node index.js --help     # Show help
+node index.js            # Start scheduler
+node testJira.js         # Test Jira only
+```
+
+### Troubleshooting Quick Tests
+
+**❌ Jira connection failing?**
+```bash
+npm run test:jira
+# Check the error output and verify your .env configuration
+```
+
+**❌ Slack posting not working?**
+- Verify bot is added to both team and summary channels
+- Check Slack token permissions in .env
+- Ensure channel IDs are correct
+
+**❌ AI generation errors?**
+- Verify `GOOGLE_AI_API_KEY` in .env
+- Check Google AI quota and billing status
+
 ## ⚙️ Configuration
 
 Create a `.env` file with the following variables:
@@ -120,9 +234,11 @@ node index.js
 
 ### Commands
 ```bash
-npm start          # Start the scheduler
-npm run test       # Run immediate summary
-npm run help       # Show available commands
+npm start             # Start the scheduler
+npm test              # Generate summary immediately for testing
+npm run test:jira     # Test Jira API connection only
+npm run help          # Show detailed help and usage
+npm run dev           # Same as npm test (immediate summary)
 ```
 
 ## 🏗️ Architecture

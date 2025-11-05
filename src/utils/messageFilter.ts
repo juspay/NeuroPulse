@@ -1,4 +1,10 @@
+import { SlackMessage, FilteredMessages, UserMessageData } from '../types/index.js';
+import { SlackService } from '../services/slackService.js';
+
 export class MessageFilter {
+  private workKeywords: string[];
+  private irrelevantPatterns: RegExp[];
+
   constructor() {
     this.workKeywords = [
       // Code & Development
@@ -70,7 +76,7 @@ export class MessageFilter {
     ];
   }
 
-  filterRelevantMessages(messages) {
+  filterRelevantMessages(messages: SlackMessage[]): SlackMessage[] {
     return messages.filter(message => {
       const text = (message.text || '').toLowerCase();
       
@@ -86,8 +92,8 @@ export class MessageFilter {
     });
   }
 
-  async groupMessagesByUser(messages, slackService) {
-    const userMessages = {};
+  async groupMessagesByUser(messages: SlackMessage[], slackService: SlackService): Promise<FilteredMessages> {
+    const userMessages: FilteredMessages = {};
     
     for (const message of messages) {
       if (!message.user || message.user === 'USLACKBOT') continue;
@@ -116,7 +122,7 @@ export class MessageFilter {
     return userMessages;
   }
 
-  buildUserContext(userMessages) {
+  buildUserContext(userMessages: FilteredMessages): string {
     let userContext = "";
     for (const [userId, userData] of Object.entries(userMessages)) {
       userContext += `\nUser ${userData.displayName} (${userId}):\n`;
