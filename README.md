@@ -1,166 +1,49 @@
 # 🧠 NeuroPulse
 
-**AI-Powered Jira Integration and Daily Summary System**
+> **AI-Powered Jira Integration with Automated Daily Summaries**
 
-NeuroPulse is Juspay's intelligent automation system that streamlines project management workflows by connecting Jira, AI analysis, and Slack communication. It automatically generates comprehensive daily summaries, tracks project health, and delivers actionable insights directly to your team channels.
+NeuroPulse streamlines project management by connecting Jira, AI analysis, and Slack communication. It automatically generates intelligent daily summaries and delivers actionable insights directly to your team channels.
 
-## ✨ Features
+## ✨ Key Features
 
-### 🎯 **Intelligent Daily Summaries**
-- **AI-Powered Analysis**: OpenAI GPT-4 processes Jira data for intelligent insights
-- **Automated Scheduling**: Configurable cron-based daily summaries (default: 9 AM weekdays)
-- **Rich Formatting**: Slack Block Kit formatting with clickable links and structured content
-- **Multi-Project Support**: Handle multiple Jira projects with independent configurations
-
-### 🔗 **Comprehensive Integrations**
-- **Jira REST API**: Real-time issue tracking, project metadata, and status monitoring
-- **Slack Web API**: Automated message posting with rich formatting and channel management
-- **OpenAI Integration**: Advanced AI summarization with technical context awareness
-- **Scheduler Service**: Flexible cron-based automation with timezone support
-
-### 🧠 **Smart Project Management**
-- **Blocker Detection**: AI identifies critical issues and impediments requiring attention
-- **Priority Analysis**: Intelligent categorization of high-priority tasks and deadlines
-- **Trend Identification**: Pattern recognition for project health and team productivity
-- **Custom Templates**: Configurable summary formats for different team needs
+- 🤖 **AI-Powered Summaries**: GPT-4 analyzes Jira data for intelligent insights
+- 📅 **Automated Scheduling**: Configurable daily summaries (default: 9 AM weekdays)
+- 🔗 **Multi-Platform Integration**: Jira, Slack, OpenAI seamlessly connected
+- 🚀 **Shelly GitHub Integration**: Automated repository setup and deployment
+- 📊 **Smart Analytics**: Blocker detection, priority analysis, trend identification
+- 🎯 **Multi-Project Support**: Handle multiple Jira projects independently
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Node.js 18.x LTS** or higher
-- **npm 8.0+** or equivalent package manager
-- **TypeScript 4.8+** (for development)
-- **Jira Account** with API token access
-- **Slack Workspace** with bot permissions
-- **OpenAI Account** with API key access
+- Node.js 18.x LTS or higher
+- Jira account with API access
+- Slack workspace with bot permissions
+- OpenAI account with API key
+- GitHub account (for Shelly integration)
 
 ### Installation
 
-1. **Clone the NeuroPulse repository**
-   ```bash
-   git clone https://github.com/Swetha-160303/NeuroPulse.git
-   cd NeuroPulse
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your Jira, Slack, and OpenAI credentials
-   ```
-
-4. **Build and start the application**
-   ```bash
-   npm run build
-   npm start
-   ```
-
-## 🧪 Development & Testing
-
-### Available Commands
-
 ```bash
-# Development Commands
-npm run dev           # Quick TypeScript development test
-npm run build         # Compile TypeScript to JavaScript
-npm run type-check    # TypeScript type checking without compilation
+# Clone repository
+git clone https://github.com/Swetha-160303/NeuroPulse.git
+cd NeuroPulse
 
-# Testing Commands
-npm test              # Build and run immediate daily summary
-npm run test:jira     # Test Jira API connection only
-npm run test:ts       # TypeScript immediate summary test
+# Install dependencies
+npm install
 
-# Production Commands
-npm start             # Start the scheduler (requires build)
-npm run start:ts      # Start with TypeScript (development)
+# Configure environment
+cp .env.example .env
+# Edit .env with your credentials
 
-# Code Quality
-npm run lint          # ESLint code checking
-npm run format        # Prettier code formatting
-npm run format:check  # Check code formatting
-```
-
-### 🔷 TypeScript Development Workflow
-
-NeuroPulse is built with **TypeScript** for type safety and enhanced development experience:
-
-**Development Cycle:**
-```bash
-# 1. Quick development testing
-npm run dev
-
-# 2. Type checking
-npm run type-check
-
-# 3. Code quality
-npm run lint && npm run format
-
-# 4. Production build
+# Build and start
 npm run build
-
-# 5. Production test
 npm start
 ```
 
-### Step-by-Step Setup Process
-
-1. **Environment Configuration**
-   ```bash
-   cp .env.example .env
-   # Configure the following in .env:
-   # - JIRA_DOMAIN, JIRA_EMAIL, JIRA_API_TOKEN
-   # - SLACK_BOT_TOKEN, SLACK_CHANNEL_ID
-   # - OPENAI_API_KEY
-   ```
-
-2. **Dependency Installation**
-   ```bash
-   npm install
-   ```
-
-3. **Jira Connection Verification**
-   ```bash
-   npm run test:jira
-   ```
-   Expected: ✅ Jira authentication successful with project data
-
-4. **Complete System Test**
-   ```bash
-   npm test
-   ```
-   Expected: ✅ Daily summary generated and posted to Slack
-
-5. **Production Deployment**
-   ```bash
-   npm run build && npm start
-   ```
-   System runs continuously with scheduled daily summaries
-
-### Troubleshooting
-
-**❌ Jira connection issues?**
-```bash
-npm run test:jira
-# Verify JIRA_DOMAIN, JIRA_EMAIL, JIRA_API_TOKEN in .env
-```
-
-**❌ Slack delivery failing?**
-- Ensure bot has `chat:write` and `channels:read` permissions
-- Verify SLACK_BOT_TOKEN and SLACK_CHANNEL_ID are correct
-- Check if bot is added to the target channel
-
-**❌ AI generation errors?**
-- Confirm OPENAI_API_KEY is valid and has credits
-- Check OpenAI API quota and billing status
-- Review model availability (GPT-4 access required)
-
 ## ⚙️ Configuration
 
-Create a `.env` file with the following variables:
+### Essential Environment Variables
 
 ```env
 # Jira Configuration
@@ -175,304 +58,269 @@ SLACK_CHANNEL_ID=C1234567890
 
 # OpenAI Configuration
 OPENAI_API_KEY=sk-your-openai-api-key
-AI_MODEL=gpt-4
 
-# Application Configuration
-NODE_ENV=development
-LOG_LEVEL=info
-PORT=3000
+# GitHub Configuration (for Shelly)
+GITHUB_TOKEN=ghp_your-github-token
 
-# Scheduler Configuration
+# Schedule Configuration
 DAILY_SUMMARY_CRON=0 9 * * 1-5
 TIMEZONE=Asia/Kolkata
 ```
 
-See the complete `.env.example` file for all available configuration options including multi-project support, performance tuning, and feature flags.
+### Service Setup
 
-### Jira Setup
-
-1. **Generate API Token**
-   - Go to [id.atlassian.com](https://id.atlassian.com/manage-profile/security/api-tokens)
-   - Create API token
-   - Note your Jira domain (without https://) and email
-
-2. **Configure Project Access**
-   - Ensure your account has read access to target Jira projects
-   - Note the project key(s) you want to monitor
-
-### Slack Setup
-
-1. **Create a Slack App**
-   - Go to [api.slack.com](https://api.slack.com/apps)
-   - Create new app from scratch
-   - Add Bot Token Scopes: `chat:write`, `channels:read`, `users:read`
-
-2. **Install and Configure**
-   - Install app to your workspace
-   - Copy Bot User OAuth Token
-   - Add bot to desired channels
-   - Get channel ID (right-click channel → View channel details)
-
-### OpenAI Setup
-
-1. **Get API Key**
-   - Go to [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-   - Create new API key
-   - Ensure you have GPT-4 access for best results
-
-## 📖 Usage
-
-### Automatic Daily Summaries
-NeuroPulse runs continuously and posts summaries based on your configured schedule (default: 9 AM weekdays, Asia/Kolkata timezone).
-
-### Manual Operations
+#### 1. Jira Setup
 ```bash
-# Generate summary immediately
-npm test
-
-# Test Jira connection only
+# Generate API token at: https://id.atlassian.com/manage-profile/security/api-tokens
+# Test connection
 npm run test:jira
-
-# Start continuous scheduler
-npm start
-
-# Development mode with TypeScript
-npm run dev
 ```
 
-### Available Scripts
+#### 2. Slack Setup
 ```bash
-npm start             # Production: Build and start scheduler
-npm test              # Generate immediate daily summary
-npm run test:jira     # Test Jira API connection
-npm run dev           # Development: TypeScript immediate summary
-npm run build         # Compile TypeScript to JavaScript
-npm run type-check    # Type checking without compilation
-npm run lint          # Code quality checking
-npm run format        # Code formatting
+# Create Slack app at: https://api.slack.com/apps
+# Required scopes: chat:write, channels:read, users:read
+# Add bot to target channel
+```
+
+#### 3. OpenAI Setup
+```bash
+# Get API key at: https://platform.openai.com/api-keys
+# Ensure GPT-4 access for optimal results
+```
+
+#### 4. Shelly Integration Setup
+```bash
+# Generate GitHub Personal Access Token with repo permissions
+export GITHUB_TOKEN=your_github_token
+
+# Run Shelly setup (automated repository configuration)
+shelly gh --force
+```
+
+## 🔧 Shelly Integration
+
+### What is Shelly?
+
+Shelly is NeuroPulse's integrated GitHub automation tool that streamlines repository setup, CI/CD configuration, and deployment processes.
+
+### Features
+
+- ✅ **Automated Repository Setup**: Branch protection, pull request rules
+- ✅ **CI/CD Pipeline Configuration**: GitHub Actions workflows
+- ✅ **NPM Publishing Setup**: Automated package publishing
+- ✅ **GitHub Pages Configuration**: Documentation hosting
+- ✅ **Security Configuration**: Branch protection, workflow permissions
+
+### Shelly Commands
+
+```bash
+# Complete repository setup
+shelly gh --force
+
+# Check current configuration
+shelly status
+
+# Update repository settings
+shelly update --config
+
+# Deploy to production
+shelly deploy --env production
+```
+
+### Repository Structure After Shelly Setup
+
+```
+NeuroPulse/
+├── .github/
+│   ├── workflows/          # Automated CI/CD pipelines
+│   └── ISSUE_TEMPLATE.md   # Issue templates
+├── docs/                   # Documentation (GitHub Pages ready)
+├── src/                    # Source code
+└── README.md              # This file
+```
+
+### Automated Configurations
+
+When you run `shelly gh --force`, it automatically configures:
+
+1. **Branch Protection Rules**
+   - Require pull request reviews
+   - Restrict direct pushes to main/release
+   - Require status checks to pass
+
+2. **GitHub Actions Workflows**
+   - Automated testing on pull requests
+   - NPM package publishing
+   - Documentation deployment
+
+3. **Repository Settings**
+   - Default branch configuration
+   - Merge strategies
+   - Delete branch on merge
+
+4. **GitHub Pages**
+   - Documentation hosting from `/docs` folder
+   - Custom domain configuration support
+
+## 📋 Available Commands
+
+```bash
+# Core Operations
+npm start              # Start scheduled daily summaries
+npm test               # Generate immediate summary
+npm run test:jira      # Test Jira connection only
+
+# Development
+npm run dev            # TypeScript development mode
+npm run build          # Compile TypeScript
+npm run type-check     # Type checking
+
+# Code Quality
+npm run lint           # ESLint checking
+npm run format         # Prettier formatting
+
+# Shelly Operations
+shelly gh --force      # Complete GitHub setup
+shelly deploy          # Deploy to production
+shelly status          # Check configuration status
 ```
 
 ## 🏗️ Architecture
 
 ```
-NeuroPulse/
-├── index.ts                     # Main entry point & CLI handler
-├── src/
-│   ├── dailySummaryApp.ts       # Core application orchestrator
-│   ├── config/
-│   │   └── config.ts            # Environment configuration loader
-│   ├── services/
-│   │   ├── schedulerService.ts  # Cron scheduling and job management
-│   │   ├── slackService.ts      # Slack API integration
-│   │   ├── jiraService.ts       # Jira REST API integration
-│   │   └── aiService.ts         # OpenAI integration
-│   ├── types/
-│   │   └── index.ts             # TypeScript type definitions
-│   └── utils/
-│       └── messageFilter.ts     # Data processing utilities
-├── test/
-│   └── testJira.ts              # Jira connection testing
-├── docs/                        # API and user documentation
-├── memory-bank/                 # Project context and knowledge base
-└── neurolink-demo/              # Example implementations
+┌─────────────────┐    ┌──────────────┐    ┌─────────────┐
+│   Jira API      │────│  NeuroPulse  │────│   Slack     │
+│                 │    │              │    │   Channel   │
+└─────────────────┘    └──────────────┘    └─────────────┘
+                              │
+                              │
+                    ┌─────────▼──────────┐
+                    │    OpenAI GPT-4    │
+                    │   AI Processing    │
+                    └────────────────────┘
+                              │
+                              │
+                    ┌─────────▼──────────┐
+                    │  Shelly GitHub     │
+                    │   Integration      │
+                    └────────────────────┘
 ```
 
-### Key Components
+### Core Services
 
-- **DailySummaryApp**: Main orchestrator coordinating all services
-- **JiraService**: Fetches issues, handles authentication and rate limiting
-- **AIService**: Processes data with OpenAI GPT-4 for intelligent summaries
-- **SlackService**: Posts formatted messages with rich Block Kit formatting
-- **SchedulerService**: Manages cron-based automation and lifecycle
-- **Configuration**: Environment-based settings with validation
-
-## 🎨 Customization
-
-### Modify Summary Schedule
-Update the cron expression in your `.env` file:
-```env
-# Daily at 9 AM on weekdays
-DAILY_SUMMARY_CRON=0 9 * * 1-5
-
-# Custom schedule examples:
-# Every 2 hours: 0 */2 * * *
-# Twice daily: 0 9,17 * * 1-5
-# Weekly on Monday: 0 10 * * 1
-```
-
-### Configure Multiple Projects
-Add multiple Jira projects in `.env`:
-```env
-JIRA_PROJECT_KEY=PROJ
-JIRA_ADDITIONAL_PROJECTS=PROJ2,PROJ3,MOBILE
-```
-
-### Customize AI Analysis
-Modify AI behavior in `src/services/aiService.ts`:
-```typescript
-// Custom prompts for different summary types
-const technicalSummaryPrompt = `
-  Focus on technical accomplishments, code reviews, and engineering blockers...
-`;
-
-// Adjust AI model parameters
-const aiConfig = {
-  model: 'gpt-4',
-  temperature: 0.7,
-  maxTokens: 2000
-};
-```
+- **JiraService**: Fetches issues and project data
+- **AIService**: Processes data with GPT-4 for intelligent summaries
+- **SlackService**: Posts formatted messages with rich formatting
+- **SchedulerService**: Manages cron-based automation
+- **ShellyIntegration**: Handles GitHub repository automation
 
 ## 📊 Sample Output
 
 ```
-📋 Daily Summary for 2025-11-04
-@JohnDoe
+📋 Daily Summary for 2025-11-05
+@TeamDev
 
-Key Accomplishments
-   • Resolved payment gateway integration (PROJ-123)
-   • Completed user authentication module
-   • Fixed critical bug in checkout flow
+✅ Key Accomplishments
+   • Payment gateway integration completed (PROJ-123)
+   • Mobile app authentication module deployed
+   • Critical checkout bug resolved
 
-Pending Tasks
-   • Working on mobile app optimization (PROJ-456)
-   • Code review for team member's PR
-   • Planning next sprint activities
+⏳ In Progress
+   • API optimization for mobile app (PROJ-456)
+   • User dashboard redesign
+   • Performance testing suite
 
-Blockers
-   • Waiting for API documentation from external vendor
+🚫 Blockers
+   • External vendor API documentation pending
+   • Database migration approval required
+
+📈 Insights
+   • 85% completion rate this week
+   • 3 critical issues resolved
+   • 2 new features deployed
 ```
 
-## 🛠️ Development
+## 🔍 Gap Analysis & Improvements
 
-### Project Structure
-- **Services**: Clean separation of Jira, Slack, AI, and Scheduler integrations
-- **Types**: Comprehensive TypeScript interfaces for all data structures
-- **Config**: Environment-based configuration with validation
-- **Utils**: Shared utilities for data processing and message filtering
-- **Memory Bank**: Project context and knowledge base for AI assistants
+### Current Gaps Identified
 
-### Adding New Features
+1. **Limited Error Handling**
+   - Need better retry mechanisms for API failures
+   - Enhanced logging for debugging
 
-1. **New AI Models**: Extend `src/services/aiService.ts` with additional OpenAI models
-2. **Additional Jira Projects**: Configure multi-project support in environment variables
-3. **Custom Slack Formatting**: Modify Block Kit templates in `src/services/slackService.ts`
-4. **Advanced Scheduling**: Enhance cron patterns in `src/services/schedulerService.ts`
-5. **Data Processing**: Add custom filters in `src/utils/messageFilter.ts`
+2. **Basic AI Prompts**
+   - Could benefit from more sophisticated prompt engineering
+   - Team-specific customization needed
 
-### Development Environment
+3. **Manual GitHub Setup**
+   - ✅ **SOLVED**: Shelly integration now automates repository setup
+   - ✅ **SOLVED**: Automated CI/CD pipeline configuration
 
-```bash
-# Setup development environment
-npm install
-npm run type-check
-npm run lint
-npm run format
+4. **Documentation Gaps**
+   - ✅ **IMPROVED**: Enhanced README with Shelly documentation
+   - ✅ **IMPROVED**: Clear setup instructions
 
-# Development testing
-npm run dev
-npm run test:jira
+### Planned Improvements
 
-# Build for production
-npm run build
-npm start
-```
+- [ ] Advanced AI model selection (GPT-4o, Claude)
+- [ ] Custom Slack slash commands
+- [ ] Real-time notifications for critical issues
+- [ ] Integration with additional project management tools
+- [ ] Advanced analytics dashboard
 
-## 🤝 Contributing
-
-We welcome contributions to NeuroPulse! Please follow these guidelines:
-
-1. **Fork the repository**
-   ```bash
-   git clone https://github.com/Swetha-160303/NeuroPulse.git
-   cd NeuroPulse
-   ```
-
-2. **Create your feature branch**
-   ```bash
-   git checkout -b feature/jira-enhancement
-   ```
-
-3. **Make your changes**
-   - Follow TypeScript best practices
-   - Add tests for new functionality
-   - Update documentation as needed
-
-4. **Test your changes**
-   ```bash
-   npm run type-check
-   npm run lint
-   npm test
-   ```
-
-5. **Commit your changes**
-   ```bash
-   git commit -m "feat: add advanced Jira filtering"
-   ```
-
-6. **Push and create Pull Request**
-   ```bash
-   git push origin feature/jira-enhancement
-   ```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development guidelines.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support & Troubleshooting
+## 🚨 Troubleshooting
 
 ### Common Issues
 
-**Q: Daily summaries not being posted**
-- Verify SLACK_BOT_TOKEN and SLACK_CHANNEL_ID in `.env`
-- Ensure bot has `chat:write` permissions
-- Check if bot is added to the target channel
-- Review scheduler configuration and timezone settings
+**Shelly Setup Fails**
+```bash
+# Check GitHub token permissions
+echo $GITHUB_TOKEN
 
-**Q: Jira connection failing**
-- Verify JIRA_DOMAIN format (without https://)
-- Check JIRA_EMAIL and JIRA_API_TOKEN are correct
-- Ensure account has read access to specified projects
-- Test connection with `npm run test:jira`
+# Ensure token has repo, workflow, and admin:repo_hook scopes
+# Re-run setup
+shelly gh --force
+```
 
-**Q: OpenAI API errors**
-- Confirm OPENAI_API_KEY is valid and has sufficient credits
-- Verify GPT-4 model access (required for best results)
-- Check API quota limits and billing status
-- Review request logs for specific error details
+**Daily Summaries Not Posted**
+```bash
+# Test individual components
+npm run test:jira    # Test Jira connection
+npm test             # Test complete flow
+```
 
-**Q: TypeScript compilation issues**
-- Run `npm run type-check` for detailed error information
-- Ensure all dependencies are installed with `npm install`
-- Check TypeScript version compatibility (4.8+ required)
+**AI Generation Errors**
+```bash
+# Check OpenAI API status
+curl -H "Authorization: Bearer $OPENAI_API_KEY" \
+     https://api.openai.com/v1/models
+```
 
-### Advanced Troubleshooting
+For detailed troubleshooting, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for comprehensive troubleshooting guide.
+## 🤝 Contributing
 
-### Getting Help
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open Pull Request
 
-- 📧 **Email**: [opensource@juspay.in](mailto:opensource@juspay.in)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/Swetha-160303/NeuroPulse/issues)
-- 📖 **Documentation**: [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/Swetha-160303/NeuroPulse/discussions)
+## 📄 License
 
-## 🙏 Acknowledgments
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
-- **[Juspay Technologies](https://juspay.io)** for sponsoring and maintaining this project
-- **[OpenAI](https://openai.com)** for GPT-4 API enabling intelligent summaries
-- **[Atlassian](https://atlassian.com)** for Jira REST API integration capabilities
-- **[Slack](https://slack.dev/)** for comprehensive SDK and Block Kit formatting
-- **[TypeScript](https://typescriptlang.org)** for enhanced development experience
-- **[node-cron](https://github.com/node-cron/node-cron)** for reliable scheduling
+## 🏢 About
 
-## 🏢 About Juspay
-
-NeuroPulse is built and maintained by [Juspay Technologies](https://juspay.io), a leading fintech company specializing in payment solutions and developer tools.
+NeuroPulse is built and maintained by [Juspay Technologies](https://juspay.io) - a leading fintech company specializing in payment solutions and developer tools.
 
 ---
+
+**⭐ Star this repository if NeuroPulse helps your team stay productive!**
+
+Made with ❤️ by the Juspay Engineering Team
+
 
 **⭐ Star this repository if NeuroPulse helps your team stay productive!** ⭐
 
