@@ -229,7 +229,7 @@ shelly status          # Check configuration status
    • Mobile app authentication module deployed
    • Critical checkout bug resolved
 
-⏳ Pending Tasks
+⏳ In Progress
    • API optimization for mobile app (PROJ-456)
    • User dashboard redesign
    • Performance testing suite
@@ -238,6 +238,10 @@ shelly status          # Check configuration status
    • External vendor API documentation pending
    • Database migration approval required
 
+📈 Insights
+   • 85% completion rate this week
+   • 3 critical issues resolved
+   • 2 new features deployed
 ```
 
 ## 🔍 Current Status & Improvements
@@ -278,145 +282,47 @@ shelly status          # Check configuration status
 
 ## 🚨 Troubleshooting
 
-### Critical Issues & Solutions
+### Quick Fixes
 
-#### **GitHub Authentication Problems**
-
-**Problem**: `Personal access tokens (classic) are forbidden from accessing this repository`
+**GitHub Access Issues**: Classic tokens blocked by enterprise policies
 ```bash
-# Error when pushing to Juspay repository
-git push origin release
-# remote: Personal access tokens (classic) are forbidden from accessing this repository.
-# fatal: unable to access 'https://github.com/juspay/NeuroPulse.git/': The requested URL returned error: 403
+# Solution: Use fine-grained tokens or SSH
+git remote set-url origin git@github.com:juspay/NeuroPulse.git
 ```
 
-**Solutions**:
-1. **Use Fine-Grained Personal Access Tokens**
-   ```bash
-   # Create fine-grained token at: https://github.com/settings/personal-access-tokens/new
-   # Select specific repository: juspay/NeuroPulse
-   # Grant permissions: Contents (read/write), Metadata (read), Pull requests (write)
-   ```
-
-2. **Request Repository Access**
-   ```bash
-   # Contact Juspay team for collaborator access
-   # Email: opensource@juspay.in
-   # Include: GitHub username and required permissions
-   ```
-
-3. **Alternative: SSH Authentication**
-   ```bash
-   # Generate SSH key
-   ssh-keygen -t ed25519 -C "your-email@company.com"
-   
-   # Add to GitHub account and update remote
-   git remote set-url origin git@github.com:juspay/NeuroPulse.git
-   ```
-
-#### **Shelly Integration Issues**
-
-**Problem**: Shelly setup fails with authentication errors
+**Shelly Setup Fails**: Authentication or token scope problems
 ```bash
-shelly gh --force
-# ❌ GitHub setup failed: Failed to get repository info
+# Check token and re-run
+echo $GITHUB_TOKEN && shelly gh --force
 ```
 
-**Solutions**:
+**Daily Summaries Not Posted**: Usually Jira, Slack, or Vertex AI config
 ```bash
-# 1. Verify token permissions
-echo $GITHUB_TOKEN  # Should not be empty
-
-# 2. Check token scopes (needs repo, workflow, admin:repo_hook)
-curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user
-
-# 3. Use organization-compatible token
-# Classic tokens may be restricted - use fine-grained tokens
-
-# 4. Re-run with verbose logging
-DEBUG=* shelly gh --force
+# Test components individually
+npm run test:jira && npm test
 ```
 
-#### **Daily Summary Generation Problems**
-
-**Problem**: Summaries not being posted to Slack
+**AI Generation Errors**: Google Cloud authentication or API access
 ```bash
-# Test individual components step by step
-npm run test:jira     # Test Jira API connection
-npm test              # Test complete summary generation flow
+# Quick check
+gcloud auth list && gcloud config get-value project
 ```
 
-**Common Causes & Fixes**:
-```bash
-# 1. Jira Authentication Issues
-export JIRA_DOMAIN="company.atlassian.net"  # No https://
-export JIRA_EMAIL="your-email@company.com"
-export JIRA_API_TOKEN="your-api-token"
+### 📖 **Comprehensive Troubleshooting**
 
-# 2. Slack Bot Permissions
-# Ensure bot has: chat:write, channels:read, users:read
-# Add bot to target channel manually
+For detailed solutions, step-by-step guides, and emergency procedures, see:
 
-# 3. Vertex AI Configuration
-gcloud auth application-default login
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account-key.json"
-export GOOGLE_CLOUD_PROJECT="your-project-id"
-```
+📋 **[Complete Troubleshooting Guide](docs/TROUBLESHOOTING.md)**
 
-#### **Vertex AI Processing Errors**
+**Includes solutions for**:
+- GitHub authentication and enterprise security policies
+- Shelly integration issues and debugging
+- Vertex AI setup and configuration problems  
+- Slack bot permissions and Socket Mode
+- Build, deployment, and performance issues
+- Emergency procedures and rollback strategies
 
-**Problem**: AI summary generation fails
-```bash
-# Check Google Cloud authentication
-gcloud auth list
-gcloud config get-value project
-
-# Test Vertex AI API access
-gcloud ai models list --region=$VERTEX_AI_LOCATION
-
-# Verify service account permissions
-gcloud projects get-iam-policy $GOOGLE_CLOUD_PROJECT
-```
-
-**Solutions**:
-```bash
-# 1. Enable required APIs
-gcloud services enable aiplatform.googleapis.com
-gcloud services enable compute.googleapis.com
-
-# 2. Set up service account with proper roles
-gcloud iam service-accounts create neuropulse-ai \
-  --description="NeuroPulse AI Service Account" \
-  --display-name="NeuroPulse AI"
-
-gcloud projects add-iam-policy-binding $GOOGLE_CLOUD_PROJECT \
-  --member="serviceAccount:neuropulse-ai@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com" \
-  --role="roles/aiplatform.user"
-
-# 3. Download and set credentials
-gcloud iam service-accounts keys create ~/neuropulse-key.json \
-  --iam-account=neuropulse-ai@$GOOGLE_CLOUD_PROJECT.iam.gserviceaccount.com
-export GOOGLE_APPLICATION_CREDENTIALS="$HOME/neuropulse-key.json"
-```
-
-### 🆘 Emergency Procedures
-
-**Critical Production Issues**:
-1. **Check system status**: `npm run health-check` (if available)
-2. **Review logs**: `tail -f logs/neuropulse.log`
-3. **Restart services**: `pm2 restart neuropulse` or `npm start`
-4. **Escalate to team**: opensource@juspay.in
-
-**Rollback Procedure**:
-```bash
-# If recent deployment broke functionality
-git log --oneline -10  # Find last working commit
-git checkout <working-commit-hash>
-npm install && npm run build
-pm2 restart neuropulse
-```
-
-For detailed troubleshooting, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+**Quick Help**: opensource@juspay.in
 
 ## 🤝 Contributing
 
@@ -439,4 +345,3 @@ NeuroPulse is built and maintained by [Juspay Technologies](https://juspay.io) -
 **⭐ Star this repository if NeuroPulse helps your team stay productive!**
 
 Made with ❤️ by the Juspay Engineering Team
-
