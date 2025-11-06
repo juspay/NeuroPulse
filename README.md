@@ -170,9 +170,6 @@ pnpm dlx @juspay/neurolink mcp test filesystem
 # Execute MCP tools directly
 pnpm dlx @juspay/neurolink mcp execute filesystem read_file --path="README.md"
 ```
-
-=======
->>>>>>> 6acd098006bb59e751402cc2062a624c3a110c45
 ## 🔧 Shelly Integration
 
 ### What is Shelly?
