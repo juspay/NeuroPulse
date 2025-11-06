@@ -93,6 +93,27 @@ npm run test:jira
 ```
 
 #### 4. Shelly Integration Setup
+>>>>>>> 6acd098006bb59e751402cc2062a624c3a110c45
+#### 4. MCP Server Setup
+```bash
+# Copy and configure MCP servers template
+cp .mcp-config.json.example .mcp-config.json
+
+# Edit the configuration file with your paths and tokens
+# Update filesystem path, GitHub token, database connections, etc.
+
+# Test MCP server configuration
+pnpm dlx @juspay/neurolink mcp list
+
+# Install and verify specific servers
+pnpm dlx @juspay/neurolink mcp install filesystem
+pnpm dlx @juspay/neurolink mcp test filesystem
+```
+
+#### 5. Shelly Integration Setup
+=======
+#### 4. Shelly Integration Setup
+>>>>>>> 6acd098006bb59e751402cc2062a624c3a110c45
 ```bash
 # Generate GitHub Personal Access Token with repo permissions
 export GITHUB_TOKEN=your_github_token
@@ -101,6 +122,62 @@ export GITHUB_TOKEN=your_github_token
 shelly gh --force
 ```
 
+<<<<<<< HEAD
+## � MCP Server Integration
+
+### What are MCP Servers?
+
+MCP (Model Context Protocol) servers extend NeuroPulse's AI capabilities by providing additional tools and data sources. They enable the AI to interact with filesystems, GitHub repositories, databases, and other external services.
+
+### Available MCP Servers for NeuroPulse
+
+- **🗂️ Filesystem**: Read/write files for documentation and data analysis
+- **🐙 GitHub**: Repository management and code analysis
+- **⏰ Time**: Scheduling and time-based operations
+- **🌐 Web**: Web scraping and content analysis
+- **🗄️ PostgreSQL**: Database queries and data insights
+
+### MCP Configuration
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/your/project"],
+      "transport": "stdio"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "transport": "stdio",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token_here"
+      }
+    }
+  }
+}
+```
+
+### MCP Commands
+
+```bash
+# List configured servers
+pnpm dlx @juspay/neurolink mcp list
+
+# Install popular servers
+pnpm dlx @juspay/neurolink mcp install filesystem
+pnpm dlx @juspay/neurolink mcp install github
+
+# Test server connectivity
+pnpm dlx @juspay/neurolink mcp test filesystem
+
+# Execute MCP tools directly
+pnpm dlx @juspay/neurolink mcp execute filesystem read_file --path="README.md"
+```
+
+=======
+>>>>>>> 6acd098006bb59e751402cc2062a624c3a110c45
 ## 🔧 Shelly Integration
 
 ### What is Shelly?
