@@ -54,12 +54,21 @@ pnpm dlx @juspay/neurolink mcp list
 
 ## Server-Specific Setup
 
-### Filesystem Server ✅ (Working)
+### Filesystem Server 🔧 (Optional)
 - **Purpose**: Read/write files, analyze project structure
-- **Requirements**: File system access (configured and tested)
+- **Requirements**: File system access (optional for NeuroPulse core functionality)
 - **Installation**: `npm install -g @modelcontextprotocol/server-filesystem`
 - **Tools**: 14+ file operations
-- **Status**: ✅ Successfully configured and tested
+- **Status**: ✅ Can be enabled or disabled based on needs
+
+#### Complete Disable Option
+If you want to eliminate all MCP-related messages:
+```json
+{
+  "mcpServers": {}
+}
+```
+This completely disables MCP integration while preserving core NeuroPulse functionality.
 
 ### Slack Server 🔧 (Needs Setup)
 - **Purpose**: Send messages, read channels, manage Slack workspace
@@ -105,7 +114,8 @@ With MCP servers configured, NeuroPulse can:
 2. **"Method not found (-32601)" errors**
    - ✅ **SOLVED**: Install MCP server globally: `npm install -g @modelcontextprotocol/server-filesystem`
    - ✅ **SOLVED**: Use direct command instead of npx in configuration
-   - Update `.mcp-config.json` to use `"command": "mcp-server-filesystem"`
+   - ✅ **SOLVED**: To completely eliminate MCP errors, disable MCP servers: `{"mcpServers": {}}`
+   - Update `.mcp-config.json` to use `"command": "mcp-server-filesystem"` or disable entirely
 
 3. **"Connection closed" errors**
    - Check token validity
