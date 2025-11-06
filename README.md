@@ -44,7 +44,6 @@ npm start
 ## ⚙️ Configuration
 
 ### Essential Environment Variables
-### Essential Environment Variables
 
 ```env
 # Jira Configuration
@@ -66,15 +65,6 @@ VERTEX_AI_LOCATION=us-central1
 GITHUB_TOKEN=ghp_your-github-token
 
 # Schedule Configuration
-# Vertex AI Configuration
-GOOGLE_CLOUD_PROJECT=your-gcp-project-id
-GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account-key.json
-VERTEX_AI_LOCATION=us-central1
-
-# GitHub Configuration (for Shelly)
-GITHUB_TOKEN=ghp_your-github-token
-
-# Schedule Configuration
 DAILY_SUMMARY_CRON=0 9 * * 1-5
 TIMEZONE=Asia/Kolkata
 ```
@@ -82,12 +72,7 @@ TIMEZONE=Asia/Kolkata
 ### Service Setup
 
 #### 1. Jira Setup
-### Service Setup
-
-#### 1. Jira Setup
 ```bash
-# Generate API token at: https://id.atlassian.com/manage-profile/security/api-tokens
-# Test connection
 # Generate API token at: https://id.atlassian.com/manage-profile/security/api-tokens
 # Test connection
 npm run test:jira
