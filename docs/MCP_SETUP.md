@@ -183,19 +183,19 @@ With MCP servers configured, NeuroPulse can:
       "command": "mcp-server-slack",
       "transport": "stdio",
       "env": {
-        "SLACK_BOT_TOKEN": "xoxb-8",
-        "SLACK_APP_TOKEN": "xapp",
-        "SLACK_SIGNING_SECRET": "",
-        "SLACK_TEAM_ID": ""
+        "SLACK_BOT_TOKEN": "xoxb-your-actual-slack-bot-token",
+        "SLACK_APP_TOKEN": "xapp-your-actual-slack-app-token",
+        "SLACK_SIGNING_SECRET": "your-actual-slack-signing-secret",
+        "SLACK_TEAM_ID": "your-actual-slack-team-id"
       }
     },
     "jira": {
-      "command": "",
+      "command": "/path/to/your/mcp-atlassian/venv/bin/mcp-atlassian",
       "transport": "stdio",
       "env": {
-        "ATLASSIAN_INSTANCE_URL": "",
-        "ATLASSIAN_USERNAME": "",
-        "ATLASSIAN_API_TOKEN": ""
+        "ATLASSIAN_INSTANCE_URL": "https://your-domain.atlassian.net",
+        "ATLASSIAN_USERNAME": "your-email@domain.com",
+        "ATLASSIAN_API_TOKEN": "your-actual-atlassian-api-token"
       }
     }
   }
