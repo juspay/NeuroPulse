@@ -298,7 +298,7 @@ shelly status          # Check configuration status
    • Mobile app authentication module deployed
    • Critical checkout bug resolved
 
-⏳ In Progress
+⏳ Pending Tasks
    • API optimization for mobile app (PROJ-456)
    • User dashboard redesign
    • Performance testing suite
@@ -307,10 +307,6 @@ shelly status          # Check configuration status
    • External vendor API documentation pending
    • Database migration approval required
 
-📈 Insights
-   • 85% completion rate this week
-   • 3 critical issues resolved
-   • 2 new features deployed
 ```
 
 ## 🔍 Current Status & Improvements
