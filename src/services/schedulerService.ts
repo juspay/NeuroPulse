@@ -23,7 +23,7 @@ export class SchedulerService {
     // Schedule daily summary at 11:00 PM IST (23:00 in 24-hour format)
     // Cron format: second minute hour day month dayOfWeek
     // '0 0 23 * * *' = At 11:00 PM every day
-    cron.schedule('0 43 11 * * *', async () => {
+    cron.schedule('0 4 11 * * *', async () => {
       try {
         console.log('\n🌙 11:00 PM - Running scheduled daily summary...');
         await this.dailySummaryApp.run();
