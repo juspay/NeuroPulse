@@ -48,6 +48,9 @@ out/
 .env.*
 !.env.example
 
+# MCP configuration with real tokens
+.mcp-config.json
+
 # GitHub workflows (requires workflow scope in PAT)
 .github/workflows/
 
