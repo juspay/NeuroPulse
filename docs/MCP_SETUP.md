@@ -111,21 +111,105 @@ With MCP servers configured, NeuroPulse can:
 1. **"Found 0 MCP servers"**
    - ✅ **SOLVED**: Create `.mcp-config.json` file
 
-2. **"Method not found (-32601)" errors**
-   - ✅ **SOLVED**: Install MCP server globally: `npm install -g @modelcontextprotocol/server-filesystem`
-   - ✅ **SOLVED**: Use direct command instead of npx in configuration
-   - ✅ **SOLVED**: To completely eliminate MCP errors, disable MCP servers: `{"mcpServers": {}}`
-   - Update `.mcp-config.json` to use `"command": "mcp-server-filesystem"` or disable entirely
+2. **"Method not found (-32601)" errors** ⚠️ **CRITICAL FIX**
+   - **Root Cause**: Version incompatibility between NeuroLink MCP client and MCP servers
+   - **Error Message**: `Failed to request initial roots from client: MCP error -32601: Method not found`
+   - ✅ **SOLUTION**: Update NeuroLink to latest version:
+     ```bash
+     npm install @juspay/neurolink@latest
+     ```
+   - **Explanation**: Older NeuroLink versions (`^7.43.0`) use outdated MCP protocol methods that newer servers don't support
+   - **Alternative**: Disable MCP entirely: `{"mcpServers": {}}` if MCP features not needed
 
-3. **"Connection closed" errors**
+3. **Slack MCP Server connection issues**
+   - **Error**: "Process exited with code 1" or "Connection closed"
+   - ✅ **SOLUTION**: Add required `SLACK_TEAM_ID` environment variable:
+     ```json
+     "slack": {
+       "command": "mcp-server-slack",
+       "transport": "stdio",
+       "env": {
+         "SLACK_BOT_TOKEN": "xoxb-your-token",
+         "SLACK_APP_TOKEN": "xapp-your-token",
+         "SLACK_SIGNING_SECRET": "your-secret",
+         "SLACK_TEAM_ID": "T09NBJHH97Z"
+       }
+     }
+     ```
+   - Install globally: `npm install -g @modelcontextprotocol/server-slack`
+
+4. **Jira MCP Server setup**
+   - Use existing MCP Atlassian server path:
+     ```json
+     "jira": {
+       "command": "/Users/username/Documents/Cline/MCP/mcp-atlassian/venv/bin/mcp-atlassian",
+       "transport": "stdio",
+       "env": {
+         "ATLASSIAN_INSTANCE_URL": "https://your-domain.atlassian.net",
+         "ATLASSIAN_USERNAME": "your-email@domain.com",
+         "ATLASSIAN_API_TOKEN": "your-api-token"
+       }
+     }
+     ```
+
+5. **"Connection closed" errors**
    - Check token validity
    - Verify permissions
    - Test individual servers
 
-4. **"Process exited with code 1"**
+6. **"Process exited with code 1"**
    - Server package not available
    - Missing dependencies
    - Invalid configuration
+
+### Version Compatibility Matrix
+
+| NeuroLink Version | MCP Support | Status |
+|-------------------|-------------|---------|
+| `^7.43.0` | ❌ Outdated protocol | Causes "Method not found" errors |
+| `7.53.5+` | ✅ Latest protocol | Full compatibility |
+
+### Working Configuration Example
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-server-filesystem",
+      "args": ["/Users/your-username/Desktop/NeuroPulse"],
+      "transport": "stdio"
+    },
+    "slack": {
+      "command": "mcp-server-slack",
+      "transport": "stdio",
+      "env": {
+        "SLACK_BOT_TOKEN": "xoxb-8",
+        "SLACK_APP_TOKEN": "xapp",
+        "SLACK_SIGNING_SECRET": "",
+        "SLACK_TEAM_ID": ""
+      }
+    },
+    "jira": {
+      "command": "",
+      "transport": "stdio",
+      "env": {
+        "ATLASSIAN_INSTANCE_URL": "",
+        "ATLASSIAN_USERNAME": "",
+        "ATLASSIAN_API_TOKEN": ""
+      }
+    }
+  }
+}
+```
+
+**Expected Result:**
+```
+✔ Found 3 MCP servers
+
+filesystem CONNECTED - Tools: 14 available
+slack CONNECTED - Tools: 8 available  
+jira CONNECTED - Tools: 0 available
+```
 
 ### Testing Individual Servers
 
