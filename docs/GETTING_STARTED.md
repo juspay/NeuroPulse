@@ -53,9 +53,10 @@ JIRA_PROJECT_KEY=PROJ
 SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
 SLACK_CHANNEL_ID=C1234567890
 
-# AI Service Configuration
-OPENAI_API_KEY=your_openai_api_key
-AI_MODEL=gpt-4
+# AI Service Configuration  
+GOOGLE_CLOUD_PROJECT=your-gcp-project-id
+GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account-key.json
+VERTEX_AI_LOCATION=us-central1
 
 # Application Configuration
 NODE_ENV=development
@@ -236,7 +237,7 @@ HEALTH_CHECK_ENDPOINT=/health
 ## Next Steps
 
 - Read the [API Documentation](./API.md)
-- Explore the `neurolink-demo/` folder for advanced examples
+- Explore the `neuropulse-demo/` folder for advanced examples
 - Set up monitoring and logging
 - Configure backup strategies for critical data
 
@@ -255,8 +256,8 @@ HEALTH_CHECK_ENDPOINT=/health
 - Ensure SLACK_CHANNEL_ID is correct
 
 **Error: AI service timeout**
-- Check your OPENAI_API_KEY
-- Verify network connectivity
+- Check your Vertex AI authentication (GOOGLE_APPLICATION_CREDENTIALS)
+- Verify network connectivity and Google Cloud project access
 - Consider increasing timeout values
 
 **Error: TypeScript compilation failed**
