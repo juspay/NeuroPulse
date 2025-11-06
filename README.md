@@ -92,6 +92,7 @@ npm run test:jira
 # Set GOOGLE_APPLICATION_CREDENTIALS environment variable
 ```
 
+<<<<<<< HEAD
 #### 4. MCP Server Setup
 ```bash
 # Copy and configure MCP servers template
@@ -109,6 +110,9 @@ pnpm dlx @juspay/neurolink mcp test filesystem
 ```
 
 #### 5. Shelly Integration Setup
+=======
+#### 4. Shelly Integration Setup
+>>>>>>> 6acd098006bb59e751402cc2062a624c3a110c45
 ```bash
 # Generate GitHub Personal Access Token with repo permissions
 export GITHUB_TOKEN=your_github_token
@@ -118,7 +122,7 @@ shelly gh --force
 ```
 
 <<<<<<< HEAD
-## � MCP Server Integration
+## 🔧 MCP Server Integration
 
 ### What are MCP Servers?
 
@@ -170,6 +174,9 @@ pnpm dlx @juspay/neurolink mcp test filesystem
 # Execute MCP tools directly
 pnpm dlx @juspay/neurolink mcp execute filesystem read_file --path="README.md"
 ```
+
+=======
+>>>>>>> 6acd098006bb59e751402cc2062a624c3a110c45
 ## 🔧 Shelly Integration
 
 ### What is Shelly?
@@ -286,6 +293,19 @@ shelly status          # Check configuration status
 - **SlackService**: Posts formatted messages with rich formatting
 - **SchedulerService**: Manages cron-based automation
 - **ShellyIntegration**: Handles GitHub repository automation
+
+### 📁 Project Structure
+
+NeuroPulse follows an enterprise-grade structure enhanced by Shelly integration:
+
+**📋 [Complete Project Structure Guide](docs/PROJECT_STRUCTURE.md)**
+
+Key transformations after Shelly setup:
+- ✅ **CI/CD Pipeline**: `.github/workflows/` for automated testing and deployment
+- ✅ **Code Quality**: ESLint, Prettier, and commit standards
+- ✅ **Documentation**: Enhanced `/docs` structure with governance files
+- ✅ **AI Integration**: `memory-bank/` for context management
+- ✅ **Demo Assets**: `neuropulse-demo/` for visual documentation
 
 ## 📊 Sample Output
 
