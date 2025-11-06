@@ -21,8 +21,8 @@ Edit `.mcp-config.json` with your credentials:
 {
   "mcpServers": {
     "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/your-username/Desktop/NeuroPulse"],
+      "command": "mcp-server-filesystem",
+      "args": ["/Users/your-username/Desktop/NeuroPulse"],
       "transport": "stdio"
     },
     "slack": {
@@ -56,8 +56,10 @@ pnpm dlx @juspay/neurolink mcp list
 
 ### Filesystem Server ✅ (Working)
 - **Purpose**: Read/write files, analyze project structure
-- **Requirements**: File system access (already configured)
+- **Requirements**: File system access (configured and tested)
+- **Installation**: `npm install -g @modelcontextprotocol/server-filesystem`
 - **Tools**: 14+ file operations
+- **Status**: ✅ Successfully configured and tested
 
 ### Slack Server 🔧 (Needs Setup)
 - **Purpose**: Send messages, read channels, manage Slack workspace
@@ -100,12 +102,17 @@ With MCP servers configured, NeuroPulse can:
 1. **"Found 0 MCP servers"**
    - ✅ **SOLVED**: Create `.mcp-config.json` file
 
-2. **"Connection closed" errors**
+2. **"Method not found (-32601)" errors**
+   - ✅ **SOLVED**: Install MCP server globally: `npm install -g @modelcontextprotocol/server-filesystem`
+   - ✅ **SOLVED**: Use direct command instead of npx in configuration
+   - Update `.mcp-config.json` to use `"command": "mcp-server-filesystem"`
+
+3. **"Connection closed" errors**
    - Check token validity
    - Verify permissions
    - Test individual servers
 
-3. **"Process exited with code 1"**
+4. **"Process exited with code 1"**
    - Server package not available
    - Missing dependencies
    - Invalid configuration
