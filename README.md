@@ -92,8 +92,6 @@ npm run test:jira
 # Set GOOGLE_APPLICATION_CREDENTIALS environment variable
 ```
 
-#### 4. Shelly Integration Setup
->>>>>>> 6acd098006bb59e751402cc2062a624c3a110c45
 #### 4. MCP Server Setup
 ```bash
 # Copy and configure MCP servers template
@@ -111,9 +109,6 @@ pnpm dlx @juspay/neurolink mcp test filesystem
 ```
 
 #### 5. Shelly Integration Setup
-=======
-#### 4. Shelly Integration Setup
->>>>>>> 6acd098006bb59e751402cc2062a624c3a110c45
 ```bash
 # Generate GitHub Personal Access Token with repo permissions
 export GITHUB_TOKEN=your_github_token
