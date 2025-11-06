@@ -529,6 +529,841 @@ npm install redis
 
 ---
 
+### **MCP Server Connection Issues**
+
+#### **Problem**: MCP (Model Context Protocol) initialization fails
+
+**Common Error Messages**:
+```bash
+# Error 1: MCP server discovery fails
+"Error: Failed to discover MCP servers: Connection timeout"
+
+# Error 2: Tool registration errors
+"Error: MCP tool registration failed: Invalid tool schema"
+
+# Error 3: External server connection issues
+"Error: External MCP server 'filesystem' not responding"
+
+# Error 4: Circuit breaker activation
+"Warning: MCP circuit breaker activated due to repeated failures"
+```
+
+**Root Causes**:
+1. External MCP servers not properly configured
+2. Network connectivity issues with MCP endpoints
+3. Invalid MCP server configurations
+4. Tool schema validation failures
+
+#### **Diagnostic Steps**:
+
+```bash
+# 1. Check MCP server status
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+const neurolink = new NeuroLink();
+neurolink.getMCPStatus().then(status => {
+  console.log('MCP Status:', JSON.stringify(status, null, 2));
+}).catch(err => console.error('MCP Error:', err.message));
+"
+
+# 2. Test specific MCP server connectivity
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+const neurolink = new NeuroLink();
+neurolink.testMCPServer('filesystem').then(result => {
+  console.log('Filesystem server test:', result);
+}).catch(err => console.error('Test failed:', err.message));
+"
+
+# 3. List available MCP servers
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+const neurolink = new NeuroLink();
+neurolink.listMCPServers().then(servers => {
+  console.log('Available servers:', servers.map(s => s.id));
+}).catch(err => console.error('List failed:', err.message));
+"
+```
+
+#### **Common Solutions**:
+
+**Issue 1: External MCP Server Not Found**
+```bash
+# Symptoms: "External MCP server 'serverId' not found"
+# Solution: Verify server configuration
+
+# 1. Check .mcp-config.json exists
+ls -la .mcp-config.json
+
+# 2. Validate JSON syntax
+cat .mcp-config.json | jq '.'
+
+# 3. Example valid configuration:
+cat > .mcp-config.json << 'EOF'
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"],
+      "transport": "stdio"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "transport": "stdio",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_token_here"
+      }
+    }
+  }
+}
+EOF
+```
+
+**Issue 2: MCP Tool Registration Failures**
+```bash
+# Symptoms: "Tool registration failed: Invalid schema"
+# Solution: Verify tool schema compliance
+
+# 1. Test tool schema validation
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+const neurolink = new NeuroLink();
+
+// Example valid tool registration
+const testTool = {
+  name: 'test_tool',
+  description: 'A test tool',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      message: {
+        type: 'string',
+        description: 'Test message'
+      }
+    },
+    required: ['message']
+  }
+};
+
+try {
+  neurolink.registerTool('test_tool', testTool);
+  console.log('Tool registration successful');
+} catch (error) {
+  console.error('Registration failed:', error.message);
+}
+"
+
+# 2. Validate existing tools
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+const neurolink = new NeuroLink();
+const tools = neurolink.getCustomTools();
+console.log('Registered tools:', Array.from(tools.keys()));
+"
+```
+
+**Issue 3: Network Connectivity Problems**
+```bash
+# Symptoms: Connection timeouts, network errors
+# Solutions:
+
+# 1. Test network connectivity
+ping -c 3 api.github.com  # For GitHub MCP servers
+curl -I https://registry.npmjs.org  # For NPM-based servers
+
+# 2. Check proxy settings (if behind corporate firewall)
+echo "HTTP_PROXY: $HTTP_PROXY"
+echo "HTTPS_PROXY: $HTTPS_PROXY"
+echo "NO_PROXY: $NO_PROXY"
+
+# 3. Configure proxy for MCP servers
+export HTTP_PROXY=http://proxy.company.com:8080
+export HTTPS_PROXY=http://proxy.company.com:8080
+export NO_PROXY=localhost,127.0.0.1
+
+# 4. Test with explicit timeout settings
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+const neurolink = new NeuroLink();
+// Set longer timeout for slow networks
+process.env.MCP_TIMEOUT = '30000';  // 30 seconds
+"
+```
+
+**Issue 4: Circuit Breaker Activation**
+```bash
+# Symptoms: "Circuit breaker activated", "MCP temporarily disabled"
+# Solutions:
+
+# 1. Reset circuit breaker manually
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+const neurolink = new NeuroLink();
+// Circuit breaker resets automatically after cooldown period
+// Or restart the application to force reset
+console.log('Restarting to reset circuit breaker...');
+"
+
+# 2. Check circuit breaker status
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+const neurolink = new NeuroLink();
+neurolink.getMCPStatus().then(status => {
+  if (status.error) {
+    console.log('Circuit breaker active:', status.error);
+  } else {
+    console.log('Circuit breaker status: Normal');
+  }
+});
+"
+
+# 3. Increase circuit breaker thresholds (if needed)
+# Add to environment variables:
+export MCP_CIRCUIT_BREAKER_THRESHOLD=10  # Default: 5
+export MCP_CIRCUIT_BREAKER_TIMEOUT=60000  # Default: 30000ms
+```
+
+#### **Advanced MCP Debugging**
+
+```bash
+# 1. Enable verbose MCP logging
+export DEBUG=mcp:*
+npm start
+
+# 2. Test individual MCP components
+node -e "
+const { initializeMCPEcosystem, listMCPs } = require('@juspay/neurolink');
+
+async function debugMCP() {
+  try {
+    console.log('Initializing MCP ecosystem...');
+    await initializeMCPEcosystem();
+    
+    console.log('Listing available MCPs...');
+    const mcps = await listMCPs();
+    console.log('Found MCPs:', mcps.length);
+    
+    mcps.forEach(mcp => {
+      console.log(\`- \${mcp.name}: \${mcp.status}\`);
+    });
+  } catch (error) {
+    console.error('MCP Debug Error:', error.message);
+    console.error('Stack:', error.stack);
+  }
+}
+
+debugMCP();
+"
+
+# 3. Monitor MCP server processes
+ps aux | grep -i mcp  # Check for running MCP server processes
+lsof -i :*  # Check for open ports used by MCP servers
+
+# 4. Test MCP server isolation
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+const neurolink = new NeuroLink();
+
+// Test servers individually
+const serverIds = ['filesystem', 'github', 'weather'];
+serverIds.forEach(async (serverId) => {
+  try {
+    const result = await neurolink.testMCPServer(serverId);
+    console.log(\`\${serverId}: \${result ? 'OK' : 'FAILED'}\`);
+  } catch (error) {
+    console.log(\`\${serverId}: ERROR - \${error.message}\`);
+  }
+});
+"
+```
+
+#### **MCP Configuration Validation**
+
+```bash
+# 1. Validate .mcp-config.json schema
+node -e "
+const fs = require('fs');
+const path = require('path');
+
+try {
+  const configPath = '.mcp-config.json';
+  if (!fs.existsSync(configPath)) {
+    console.log('No .mcp-config.json found - using defaults');
+    process.exit(0);
+  }
+  
+  const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  
+  // Validate required structure
+  if (!config.mcpServers) {
+    throw new Error('Missing mcpServers section');
+  }
+  
+  // Validate each server
+  for (const [serverId, serverConfig] of Object.entries(config.mcpServers)) {
+    if (!serverConfig.command) {
+      throw new Error(\`Server '\${serverId}' missing command\`);
+    }
+    if (!serverConfig.transport) {
+      throw new Error(\`Server '\${serverId}' missing transport\`);
+    }
+    console.log(\`✅ Server '\${serverId}' configuration valid\`);
+  }
+  
+  console.log('✅ MCP configuration validation passed');
+} catch (error) {
+  console.error('❌ MCP configuration validation failed:', error.message);
+  process.exit(1);
+}
+"
+
+# 2. Test server executable availability
+node -e "
+const { execSync } = require('child_process');
+const config = require('./.mcp-config.json');
+
+for (const [serverId, serverConfig] of Object.entries(config.mcpServers || {})) {
+  try {
+    // Test if command is available
+    execSync(\`which \${serverConfig.command}\`, { stdio: 'ignore' });
+    console.log(\`✅ Command '\${serverConfig.command}' for server '\${serverId}' is available\`);
+  } catch (error) {
+    console.log(\`❌ Command '\${serverConfig.command}' for server '\${serverId}' not found\`);
+  }
+}
+"
+```
+
+---
+
+### **NeuroLink + MCP Integration Errors**
+
+#### **Problem**: NeuroLink MCP initialization and integration failures
+
+**Common Error Messages**:
+```bash
+# Error 1: NeuroLink MCP initialization failed
+"[NeuroLink] MCP initialization failed"
+
+# Error 2: NeuroLink configuration loading failed  
+"[NeuroLink] MCP configuration loading failed"
+
+# Error 3: External server registration failed
+"[NeuroLink] Failed to add external MCP server: serverId"
+
+# Error 4: Tool execution through NeuroLink failed
+"[NeuroLink] External MCP tool execution failed: toolName"
+
+# Error 5: NeuroLink MCP not available
+"[NeuroLink] ⚠️ LOG_POINT_T004_MCP_NOT_AVAILABLE"
+
+# Error 6: Cannot execute external MCP tool
+"Cannot execute external MCP tool: NeuroLink executeExternalMCPTool not available"
+```
+
+**Root Causes**:
+1. NeuroLink initialization sequence issues
+2. Incompatible NeuroLink + MCP configuration
+3. External server manager failures
+4. Tool registry synchronization problems
+5. NeuroLink instance not properly initialized
+
+#### **Diagnostic Steps**:
+
+```bash
+# 1. Check NeuroLink MCP initialization status
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+
+async function checkNeuroLinkMCP() {
+  try {
+    const neurolink = new NeuroLink();
+    
+    // Wait for initialization
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    console.log('🔍 Checking NeuroLink MCP Status...');
+    const status = await neurolink.getMCPStatus();
+    
+    console.log('NeuroLink MCP Status:', {
+      mcpInitialized: status.mcpInitialized,
+      totalServers: status.totalServers,
+      totalTools: status.totalTools,
+      externalMCPServersCount: status.externalMCPServersCount,
+      error: status.error
+    });
+    
+    if (!status.mcpInitialized) {
+      console.error('❌ NeuroLink MCP not properly initialized');
+      console.log('💡 This indicates a NeuroLink-specific MCP integration issue');
+    }
+    
+    await neurolink.shutdown();
+  } catch (error) {
+    console.error('❌ NeuroLink MCP check failed:', error.message);
+  }
+}
+
+checkNeuroLinkMCP();
+"
+
+# 2. Test NeuroLink external server management
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+
+async function testNeuroLinkExternalServers() {
+  try {
+    const neurolink = new NeuroLink();
+    
+    console.log('🔍 Testing NeuroLink External Server Management...');
+    
+    // List external servers
+    const servers = neurolink.listExternalMCPServers();
+    console.log('External servers:', servers.length);
+    
+    // Get external tools
+    const tools = neurolink.getExternalMCPTools();
+    console.log('External tools:', tools.length);
+    
+    // Get statistics
+    const stats = neurolink.getExternalMCPStatistics();
+    console.log('Statistics:', stats);
+    
+    await neurolink.shutdown();
+  } catch (error) {
+    console.error('❌ NeuroLink external server test failed:', error.message);
+  }
+}
+
+testNeuroLinkExternalServers();
+"
+
+# 3. Test NeuroLink tool execution capabilities
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+
+async function testNeuroLinkToolExecution() {
+  try {
+    const neurolink = new NeuroLink();
+    
+    console.log('🔍 Testing NeuroLink Tool Execution...');
+    
+    // Get custom tools
+    const customTools = neurolink.getCustomTools();
+    console.log('Custom tools registered:', customTools.size);
+    
+    // List tool names
+    for (const [name, tool] of customTools) {
+      console.log(\`- Tool: \${name}\`);
+    }
+    
+    await neurolink.shutdown();
+  } catch (error) {
+    console.error('❌ NeuroLink tool execution test failed:', error.message);
+  }
+}
+
+testNeuroLinkToolExecution();
+"
+```
+
+#### **Common Solutions**:
+
+**Issue 1: NeuroLink MCP Initialization Failed**
+```bash
+# Symptoms: "MCP initialization failed", startup hangs
+# Solution: Check NeuroLink initialization sequence
+
+# 1. Verify NeuroLink installation
+npm list @juspay/neurolink
+# Should show installed version
+
+# 2. Test minimal NeuroLink initialization
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+
+async function testMinimalInit() {
+  try {
+    console.log('Creating NeuroLink instance...');
+    const neurolink = new NeuroLink();
+    
+    console.log('✅ NeuroLink instance created successfully');
+    
+    // Graceful shutdown
+    await neurolink.shutdown();
+    console.log('✅ NeuroLink shutdown completed');
+  } catch (error) {
+    console.error('❌ NeuroLink minimal init failed:', error.message);
+    console.error('Stack:', error.stack);
+  }
+}
+
+testMinimalInit();
+"
+
+# 3. Clear any cached NeuroLink state
+rm -rf .neurolink-cache/ || true
+rm -rf node_modules/.cache/@juspay/ || true
+
+# 4. Reinstall NeuroLink if needed
+npm uninstall @juspay/neurolink
+npm install @juspay/neurolink
+```
+
+**Issue 2: NeuroLink Configuration Conflicts**
+```bash
+# Symptoms: Configuration loading errors, server conflicts
+# Solution: Validate NeuroLink-specific MCP configuration
+
+# 1. Check for conflicting configurations
+ls -la .mcp-config.json .neurolink-config.json || true
+
+# 2. Validate NeuroLink configuration format
+node -e "
+const fs = require('fs');
+
+try {
+  // Check for NeuroLink-specific configuration
+  if (fs.existsSync('.neurolink-config.json')) {
+    const config = JSON.parse(fs.readFileSync('.neurolink-config.json', 'utf8'));
+    console.log('✅ NeuroLink config found and valid');
+    console.log('Config keys:', Object.keys(config));
+  } else {
+    console.log('ℹ️ No .neurolink-config.json found (using defaults)');
+  }
+  
+  // Check standard MCP config compatibility with NeuroLink
+  if (fs.existsSync('.mcp-config.json')) {
+    const mcpConfig = JSON.parse(fs.readFileSync('.mcp-config.json', 'utf8'));
+    console.log('✅ MCP config found');
+    
+    // Validate NeuroLink compatibility
+    if (mcpConfig.mcpServers) {
+      for (const [serverId, config] of Object.entries(mcpConfig.mcpServers)) {
+        if (!config.command || !config.transport) {
+          console.warn(\`⚠️ Server '\${serverId}' may not be NeuroLink compatible\`);
+        }
+      }
+    }
+  }
+} catch (error) {
+  console.error('❌ Configuration validation failed:', error.message);
+}
+"
+
+# 3. Create minimal NeuroLink-compatible MCP configuration
+cat > .mcp-config.json << 'EOF'
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+      "transport": "stdio"
+    }
+  }
+}
+EOF
+```
+
+**Issue 3: External Server Manager Failures**
+```bash
+# Symptoms: "Failed to add external MCP server", server management errors
+# Solution: Test and repair external server management
+
+# 1. Test external server manager directly
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+
+async function testExternalServerManager() {
+  try {
+    const neurolink = new NeuroLink();
+    
+    console.log('🔍 Testing External Server Manager...');
+    
+    // Test adding a simple external server
+    const testConfig = {
+      id: 'test-server',
+      name: 'Test Server',
+      command: 'echo',
+      args: ['{}'],
+      transport: 'stdio'
+    };
+    
+    console.log('Adding test server...');
+    const addResult = await neurolink.addExternalMCPServer('test-server', testConfig);
+    
+    if (addResult.success) {
+      console.log('✅ External server added successfully');
+      
+      // Clean up
+      await neurolink.removeExternalMCPServer('test-server');
+      console.log('✅ External server removed successfully');
+    } else {
+      console.error('❌ Failed to add external server:', addResult.error);
+    }
+    
+    await neurolink.shutdown();
+  } catch (error) {
+    console.error('❌ External server manager test failed:', error.message);
+  }
+}
+
+testExternalServerManager();
+"
+
+# 2. Check for external server process conflicts
+ps aux | grep -i mcp | grep -v grep || echo "No MCP processes found"
+
+# 3. Clear external server cache
+rm -rf /tmp/neurolink-external-servers/ || true
+```
+
+**Issue 4: Tool Registry Synchronization Problems**
+```bash
+# Symptoms: Tools not available, registry conflicts
+# Solution: Reset and test tool registry
+
+# 1. Test tool registry operations
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+
+async function testToolRegistry() {
+  try {
+    const neurolink = new NeuroLink();
+    
+    console.log('🔍 Testing Tool Registry...');
+    
+    // Register a test tool
+    const testTool = {
+      name: 'test_tool',
+      description: 'A test tool for registry validation',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          message: { type: 'string' }
+        },
+        required: ['message']
+      }
+    };
+    
+    console.log('Registering test tool...');
+    neurolink.registerTool('test_tool', testTool);
+    
+    // Check if tool is registered
+    const customTools = neurolink.getCustomTools();
+    if (customTools.has('test_tool')) {
+      console.log('✅ Tool registry working correctly');
+    } else {
+      console.error('❌ Tool not found in registry');
+    }
+    
+    await neurolink.shutdown();
+  } catch (error) {
+    console.error('❌ Tool registry test failed:', error.message);
+  }
+}
+
+testToolRegistry();
+"
+
+# 2. Reset tool registry cache
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+
+async function resetToolRegistry() {
+  try {
+    const neurolink = new NeuroLink();
+    
+    console.log('🔄 Resetting tool registry...');
+    
+    // Get current tools
+    const tools = neurolink.getCustomTools();
+    console.log(\`Current tools: \${tools.size}\`);
+    
+    // Force re-initialization
+    await neurolink.shutdown();
+    console.log('✅ Tool registry reset completed');
+  } catch (error) {
+    console.error('❌ Tool registry reset failed:', error.message);
+  }
+}
+
+resetToolRegistry();
+"
+```
+
+**Issue 5: NeuroLink Instance Not Available**
+```bash
+# Symptoms: "NeuroLink executeExternalMCPTool not available"
+# Solution: Verify NeuroLink instance lifecycle
+
+# 1. Test NeuroLink instance lifecycle
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+
+async function testInstanceLifecycle() {
+  let neurolink;
+  
+  try {
+    console.log('🔍 Testing NeuroLink Instance Lifecycle...');
+    
+    // Create instance
+    console.log('1. Creating NeuroLink instance...');
+    neurolink = new NeuroLink();
+    
+    // Wait for full initialization
+    console.log('2. Waiting for initialization...');
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // Test basic functionality
+    console.log('3. Testing basic functionality...');
+    const status = await neurolink.getMCPStatus();
+    console.log('Status check:', status.mcpInitialized ? '✅' : '❌');
+    
+    // Test external tool capabilities
+    console.log('4. Testing external tool capabilities...');
+    const externalTools = neurolink.getExternalMCPTools();
+    console.log(\`External tools available: \${externalTools.length}\`);
+    
+    console.log('✅ NeuroLink instance lifecycle test completed');
+    
+  } catch (error) {
+    console.error('❌ Instance lifecycle test failed:', error.message);
+  } finally {
+    if (neurolink) {
+      try {
+        await neurolink.shutdown();
+        console.log('✅ Graceful shutdown completed');
+      } catch (shutdownError) {
+        console.error('⚠️ Shutdown error:', shutdownError.message);
+      }
+    }
+  }
+}
+
+testInstanceLifecycle();
+"
+
+# 2. Check for memory leaks or hanging processes
+node -e "
+process.on('exit', () => {
+  console.log('✅ Node.js process exiting cleanly');
+});
+
+setTimeout(() => {
+  console.log('⚠️ Process still running after 10 seconds - possible hanging');
+  process.exit(1);
+}, 10000);
+
+const { NeuroLink } = require('@juspay/neurolink');
+const neurolink = new NeuroLink();
+
+setTimeout(async () => {
+  await neurolink.shutdown();
+  console.log('✅ Test completed');
+  process.exit(0);
+}, 5000);
+"
+```
+
+#### **Advanced NeuroLink MCP Debugging**
+
+```bash
+# 1. Enable comprehensive NeuroLink debugging
+export DEBUG=neurolink:*,mcp:*
+export LOG_LEVEL=debug
+
+# 2. Monitor NeuroLink events
+node -e "
+const { NeuroLink } = require('@juspay/neurolink');
+
+async function monitorNeuroLinkEvents() {
+  try {
+    const neurolink = new NeuroLink();
+    
+    // Listen to NeuroLink events
+    const emitter = neurolink.getEventEmitter();
+    
+    emitter.on('tool:start', (event) => {
+      console.log('🚀 Tool started:', event.toolName);
+    });
+    
+    emitter.on('tool:end', (event) => {
+      console.log('✅ Tool completed:', event.toolName, event.success ? 'SUCCESS' : 'FAILED');
+    });
+    
+    emitter.on('error', (error) => {
+      console.error('❌ NeuroLink error:', error);
+    });
+    
+    // External MCP events
+    emitter.on('externalMCP:serverConnected', (event) => {
+      console.log('🔗 External MCP server connected:', event.serverId);
+    });
+    
+    emitter.on('externalMCP:serverDisconnected', (event) => {
+      console.log('💔 External MCP server disconnected:', event.serverId);
+    });
+    
+    emitter.on('externalMCP:serverFailed', (event) => {
+      console.error('💥 External MCP server failed:', event.serverId, event.error);
+    });
+    
+    console.log('🎧 Monitoring NeuroLink events for 30 seconds...');
+    
+    setTimeout(async () => {
+      await neurolink.shutdown();
+      console.log('✅ Event monitoring completed');
+    }, 30000);
+    
+  } catch (error) {
+    console.error('❌ Event monitoring failed:', error.message);
+  }
+}
+
+monitorNeuroLinkEvents();
+"
+
+# 3. Test NeuroLink with NeuroPulse integration
+node -e "
+// Test NeuroLink integration within NeuroPulse context
+const { NeuroLink } = require('@juspay/neurolink');
+
+async function testNeuroPulseIntegration() {
+  try {
+    console.log('🔍 Testing NeuroLink integration in NeuroPulse context...');
+    
+    const neurolink = new NeuroLink();
+    
+    // Test AI generation with MCP tools
+    const testPrompt = 'What time is it?';
+    
+    try {
+      const result = await neurolink.generate({
+        text: testPrompt,
+        disableTools: false  // Enable MCP tools
+      });
+      
+      console.log('✅ NeuroLink generation successful');
+      console.log('Response length:', result.content.length);
+    } catch (genError) {
+      console.error('❌ NeuroLink generation failed:', genError.message);
+    }
+    
+    await neurolink.shutdown();
+    
+  } catch (error) {
+    console.error('❌ NeuroPulse integration test failed:', error.message);
+  }
+}
+
+testNeuroPulseIntegration();
+"
+```
+
+---
+
 ### **Monitoring and Logging**
 
 #### **Enable Comprehensive Logging**
@@ -542,6 +1377,13 @@ npm install winston winston-daily-rotate-file
 
 # 3. Monitor key metrics
 echo "Summary generation time: $(date)" >> metrics.log
+
+# 4. Enable MCP-specific logging
+export DEBUG=mcp:*,neurolink:mcp:*
+
+# 5. Enable NeuroLink-specific debugging
+export DEBUG=neurolink:*,mcp:*
+export NEUROLINK_DEBUG=true
 ```
 
 #### **Health Check Endpoint**
