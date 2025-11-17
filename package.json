@@ -40,7 +40,7 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/vertexai": "^1.10.0",
-    "@juspay/neurolink": "^7.53.5",
+    "@juspay/neurolink": "^7.54.0",
     "@juspay/shelly": "^1.1.0",
     "@slack/socket-mode": "^2.0.5",
     "dot-env": "^0.0.1",
