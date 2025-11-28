@@ -1,5 +1,5 @@
 # NeuroPulse Dockerfile
-FROM node:20-alpine AS base
+FROM node:25-alpine AS base
 
 # Install dependencies needed for native modules
 RUN apk add --no-cache \
