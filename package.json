@@ -45,7 +45,7 @@
     "@slack/socket-mode": "^2.0.5",
     "dot-env": "^0.0.1",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "luxon": "^3.7.2",
     "node-cron": "^4.2.1",
     "node-fetch": "^3.3.2",
